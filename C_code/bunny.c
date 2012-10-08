@@ -34,7 +34,7 @@ polynom Sbox4(polynom x) {
 }
 
 //polynom MixingLayer(polynom x[4]) {
-//
+//x
 //}
 
 int main(int argc, char ** argv) {
