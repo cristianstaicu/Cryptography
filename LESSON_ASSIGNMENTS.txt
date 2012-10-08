@@ -1,0 +1,86 @@
+LESSON_01 - 2012-09-28
+- read and study the specifications of the project
+- become confidential with the C code for the communication 
+  + read and understand the files:
+    server.c
+	client.c
+	common.h
+	common.c
+  + use of the functions "write_msg()" and "read_msg()"
+- create "client_folder" and "server_folder" with some ".txt" file in it
+- write the C code (using also write_msg() and read_msg() function) to:
+  + get data from the .txt files in the two folders
+  + write data on the channel
+  + read data from the channel
+- correct bugs of the given C code!
+
+LESSON_02 - 2012-10-05
+- Study the specification of BUNNYTN 
+  (slides on Google: search for "bunnytn martin"... soon... in english!...)
+- Implement the following functions:
+  + Sum() 
+    // perform the sum of two polynomial with coefficients over F_2
+	INPUT:  n (integer)
+	        a,b (two polynomials of degree less than n)
+    OUTPUT: c
+	NOTE: the polynomials can be seen as array of n bits
+  + Product() 
+    // perform the product of two polynomials (with coefficients over F_2)
+    // modulo a "special" polynomial, the field polynomial
+	INPUT:  p (the field polynomial, an irreducible polynomial of degree n over F_2)
+	        a,b (two polynomials of degree less than n)
+    OUTPUT: c
+	NOTE: the polynomials can be seen as array of n bits
+  + Rotate()
+    // rotate an array of bits by t bits
+	INPUT:  v (array of n bits)
+	        t (number of bits we need to rotate, if d>0 rotate to the right,if d<0 to the left)
+    OUTPUT: w (v rotated by t bits)
+  	
+LESSON_03 - 2012-10-12
+- Implement BunnyTn() function:
+  + BunnyTn()
+  INPUT:  k (key of 24 bits)
+	        m (message of 24 bits)
+  OUTPUT: c (ciphertext of 24 bits)
+  
+  You will need also to implement the following funtions:
+  + Sbox1()
+  + Sbox2()
+  + Sbox3()
+  + Sbox4()
+  INPUT:  v (vector of 6 bits)
+  OUTPUT: w (vector of 6 bits)
+  
+  + MixingLayer()
+  INPUT:  v (vector of 4 words of 6 bits each, or vector of 24 bits)
+  OUTPUT: w (vector of 4 words of 6 bits each, or vector of 24 bits)
+  
+  + RoundFunction()
+  INPUT:  v (vector of 24 bits)
+  OUTPUT: w (vector of 24 bits)
+  
+  + KeySchedule()
+  INPUT:  k (k of 24 bits)
+  OUTPUT: rk[] (array of 16 round keys of 24 bits each)
+
+LESSON_04 - 2012-10-19
+/* ... */
+
+LESSON_05 - 2012-10-26
+/* ... */
+
+LESSON_06
+/* ... */
+
+LESSON_07
+/* ... */
+
+LESSON_08
+/* ... */
+
+LESSON_09
+/* ... */
+
+LESSON_10
+/* ... */

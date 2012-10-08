@@ -1,0 +1,18 @@
+CLIENT_FOLDER:
+
+client_rsa_private_key.txt
+client_rsa_public_key.txt
+server_rsa_public_key.txt
+client_cipher_suite.txt
+client_sym_private_key.txt
+client_message.txt
+...
+
+SERVER_FOLDER:
+
+server_rsa_private_key.txt
+server_rsa_public_key.txt
+clients_rsa_public_keys.txt // this files contains many rows, each containing <client_name> <client_public_key>
+server_cipher_suite_list.txt
+server_sym_private_key.txt
+server_message.txt

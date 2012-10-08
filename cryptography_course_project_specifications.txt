@@ -1,0 +1,267 @@
+ /*************************/
+/******** PROJECT ********/
+/***** SPECIFICATIONS ****/
+/** CRYPTOGRAPHY COURSE **/
+/*************************/
+
+* PROJECT GOALS
+  
+  Implement two executables/programs, "Client" and "Server", which simulate on a single PC an encrypted communication between a client and a server (respectively C and S).
+  
+  The channel to be used by C and S must be a named pipe called "channel.fifo".
+  The C code which implement the connection and the communicatoin between the two processes is given. 
+  The student is requested to implement the cryptographic functions and to integrate them with the given C code.
+
+* PROTOCOL 
+  The two executables "Server" and "Client" must follow a given PROTOCOL and thus be able to:
+   - communicate to each other on a public/unsecure CHANNEL (a named pipe) 
+     Remark: the operation over the channel are "WRITE" to send something on the channel, "READ" to receive something from the channel 
+   - read information from two distinct FOLDERS, "client_folder" and "server_folder" 
+     Remark: when server or client access to their folders, we say GET and PUT
+   - agree on a cipher suite  
+   - communicate using the primitives listed in the cipher suite.
+   Very important note! Messagese must have a precise MESSAGE STRUCTURE, defined later.
+
+   The programs/agreement must follow the following protocol:
+ 
+   CONNECTION
+   - the Server starts in idle(listening) mode
+   - the Client contacts the Server (connects to his channel)
+
+   AUTHENTICATION
+   SERVER AUTENTICATION
+   - the Client challenges the Server:
+      + C GETs the public rsa key of S, (s_puk,n)
+      + C creates a pseudo-random message r
+      + C encrypts r using s_puk -> c = r^s_puk mod n
+      + C WRITEs c to S
+      + S READs c from S
+      + S GETs its own private key, (c_prk,n)
+      + S decrypts c using his private key, s_prk -> r' = c^s_prk mod n
+      + S WRITEs r' to C
+      + C checks r' = r: if true then S is authenticated by C, otherwise C interrupts the communication
+
+   CLIENT AUTENTICATION
+   - the Client request the access to the Server, specifying its identity (each client will be identified by a string of char)
+      + C WRITEs his name nm to S
+      + S READs the name nm of C
+   - the Server challenges the Client:
+      + S GETS the public rsa keys of the possible clients associated to each name, (names[],c_puk[],n[])
+      + S extracts from (names[],c_puk[],n[]) the pair (c_puk[i],n[i]) where names[i] = nm
+      + S creates a pseudo-random message r
+      + S encrypts r using s_puk[i] -> c = r^s_puk[i] mod n[i]
+      + S WRITEs c to C
+      + C READs c from S
+      + C GETS its own secret key, (s_prk,n) // note: it must be that n = n[i]
+      + C decrypts c using his private key, (c_prk,n) -> r' = c^c_prk mod n
+      + C WRITEs r' to S
+      + S READ R' from C
+      + S checks r' = r: if true then C is authenticated by S, otherwise S interrupts the communication
+   
+   NEGOTIATION OF THE CIPHER SUITE
+   - the Client and the Server must "negotiate" a cipher suite
+      + C WRITEs his cipher suite list (read from a file) to S 
+      + S READS the cipher suite of C
+      + S searches for the cipher suite of C in a file containing the list of his cipher suites. If match is found then S and C start to use the matching cipher suite, otherwise S returns an error and closes the connection. Any cipher suite contains
+         % one block/stream cipher
+         % one public key protocol
+         % one hash function
+
+   NEGOTIATION OF A PRIVATE KEY
+   - the Client and Server negotiate a private key k using the chosen public key crypto system (this will be specified later)
+
+   ENCRYPTED COMMUNICATION
+   - C GETs a message m (from a file)
+   - C encrypts and sends m to S using the chosen private key crypto system
+      + C encrypts m using the chosen cipher B with the private key k -> c = B(m,k)
+      + (INTEGRITY OF THE MESSAGE) C attach to c the hash of m using the private key k -> g = Hash(m,k)
+      + C WRITEs (c,g) to S
+      + S READs (c,g) from C
+   - the Server decrypts the Client message using the chosen private key crypto system
+      + S decrypts m' = B^-1(c,k)
+      + (INTEGRITY OF THE MESSAGE) S checks if g = Hash(m',k). 
+        If true proceed, if false WRITE to C "MESSAGE VIOLATED!" and close the connection
+      + S PUTs m' on a file 
+      + S WRITEs "MESSAGE RECEIVED AND DECRYPTED!" if decryption and integrity control went ok, otherwise 
+      + C READs whatever is the message from S... and proceed to close the connection
+ 
+   DISCONNECTION
+   - the Client closes the connection
+   - the Server enters again idle mode
+
+* MESSAGE STRUCTURE:
+  Each message M which is written on the channel must be divided in two parts in the following order:
+  M = (D,W), where:
+  - D, always two bytes long, indicates the length of W, the second part of the message
+  - W, of length at most 14 bytes, are the actual words that are sent.
+  
+* CHANNEL
+  The channel will be a named pipe called channel.fifo. 
+  The name of the channel must be an input parameter of the two executables.
+
+* FOLDERS/TEST VECTORS
+  
+  To negotiate the cipher suite we use the following convention, assigning a number to each cryptographic primitive:
+  1 -> block_cipher_1
+  2 -> block_cipher_2
+  3 -> stream_cipher_1
+  4 -> stream_cipher_2
+  5 -> hash_function_1
+  6 -> hash_function_2
+  7 -> public_crypto_system_1
+  8 -> public_crypto_system_2
+  ...
+  
+  - The folder "client_folder" must contain at most:
+    + 1 file "client_cipher_suite.txt" containing his cipher suite (composed by only three primitives, a block/stream cipher, a hash function, a public cipher)
+      Example file:
+      ----------------------
+      1
+      5
+      7
+      ----------------------
+
+    + 1 file "client_sym_private_key.txt"
+      Example file:
+      ----------------------
+      18
+      ----------------------
+
+    + 1 file "client_message.txt" containing the message we want to send
+      E xample file:
+      ----------------------
+      100
+      ----------------------
+    
+    + 1 file "client_rsa_private_key.txt"
+      Example file:
+      ----------------------
+      77,11
+      ----------------------
+    + 1 file "client_rsa_public_key.txt"
+      Example file:
+      ----------------------
+      77,51
+      ----------------------
+    + 1 file "server_rsa_public_key.txt"
+      ----------------------
+      33,7
+      ----------------------
+
+    + files for the public key cryptosystems
+    ...
+
+  - The folder "server_folder" must contain:
+    
+    + 1 file "clients_rsa_public_keys.txt"
+      Example file:
+      ----------------------
+      Pippo  77 51
+      Pluto  .. ..
+      ...
+      ----------------------
+
+    + 1 file "server_rsa_private_key.txt"
+      Example file:
+      ----------------------
+      33,3
+      ----------------------
+    + 1 file "server_rsa_public_key.txt"
+      Example file:
+      ----------------------
+      33,7
+      ----------------------
+    
+    + 1 file "server_cipher_suite_list.txt" containing the list of enciphering functions available from the server
+      Example file:
+      ----------------------
+      1,5,7
+      1,5,8
+      2,6,7
+      ...
+      ---------------------- 
+    
+    + 1 file "server_sym_private_key.txt" (similar to client's)
+    + 1 file "server_message.txt" (similar to client's)
+    ... 
+
+* FUNCTIONS SPECIFICATIONS
+
+  - block_cipher_1()
+    INPUT: message, key
+    OUTPUT: enciphered_message
+    /* ...to be completed... */ 
+
+  - block_cipher_2()
+    INPUT: message, key
+    OUTPUT: enciphered_message
+    /* ...to be completed... */
+
+  - stream_cipher_1()
+    INPUT: message, key
+    OUTPUT: enciphered_message
+    /* ...to be completed... */
+
+  - stream_cipher_2()
+    INPUT: message, key
+    OUTPUT: enciphered_message
+    /* ...to be completed... */
+
+  - hash_1()
+    INPUT: message, key
+    OUTPUT: hashed_message
+    /* ...to be completed... */
+
+  - hash_2()
+    INPUT: message, key
+    OUTPUT: hashed_message
+    /* ...to be completed... */
+
+  - pseudorandom_generator_1()
+    /* ...to be completed... */
+
+  - pseudorandom_generator_2()
+    /* ...to be completed... */
+
+  /* ...other functions will be specified during the course... */
+
+* EXAMPLE OF COMMUNICATION
+  In this example the Server is in idle mode, when contacted by the Client the following steps are done:
+  - the Server challenges the Client using Server rsa public key, 
+  - the Server and the Client agree on a cipher suite, 
+  - the Server and the Client negotiate a private key using the selected public crypto system 
+  - the Client sends an enciphered message with an integrity message to the Server
+  - the Server decrypts the message sent by the Client and verifies the integrity of the message
+
+  The symbol "//" indicates comments which are not displayed on the terminal screen.
+  The symbol "$" indicates that the program is doing operations which are not included in the conversation.
+  All lines beginning with no symbols are all messages displayed on the UNSECURE CHANNEL!!
+
+
+
+REMARKS1: We use CBC mode for communication
+REMARKS2: 
+
+The Block ciphers in use are:
+1) BUNNYTN
+2) MINIFEISTEL
+
+The Stream ciphers in use are:
+1) MAJ5
+2) ALL5
+
+
+Description
+MAJ5
+NR REGISTERS:     Five LFSR
+UPDATE FUNCTION:  majority function 
+OUTPUT FUNCTION:  XOR of all registers
+
+ALL5
+NR REGISTERS:     Five LFSR
+UPDATE FUNCTION:  all registers move 
+OUTPUT FUNCTION:  semi-bent, balanced Boolean function 
+                  f:(F2)^5->F2
+
+
+
