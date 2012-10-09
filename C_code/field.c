@@ -28,20 +28,20 @@ polynom add(polynom a, polynom b) {
 			copy(b.p, res.p, min_order, max_order);
 		}
 	}
-	char same_order = (min_order == max_order);
+//	char same_order = (min_order == max_order);
 	char i = 0;
-	char new_gd = 0;
+//	char new_gd = 0;
 	for (i = 0; i < min_order; i++) {
 		res.p[i] = (a.p[i] + b.p[i]) % 2;
-		if (same_order && res.p[i]) {
-			new_gd = i;
-		}
-}
-	if (min_order != max_order) {
-		res.size = max_order;
-	} else {
-		res.size = new_gd + 1;
+//		if (same_order && res.p[i]) {
+//			new_gd = i;
+//		}
 	}
+//	if (min_order != max_order) {
+		res.size = max_order;
+//	} else {
+//		res.size = new_gd + 1;
+//	}
 	return res;
 }
 
@@ -76,19 +76,29 @@ polynom shift_right(polynom a, char pos) {
 	return res;
 }
 
-polynom mult(polynom a, polynom b, polynom p) {
+int get_grade(polynom p) {
+	int i;
+	for (i = p.size; i >= 0; i--) {
+		if (p.p[i]) {
+			return i + 1;
+		}
+	}
+	return -1;
+}
+
+polynom mult_a(polynom a, char b[], int bsize, polynom p) {
+	int result_size = p.size - 1;
 	polynom res;
-	int max_len = a.size + b.size - 1;
+	int max_len = a.size + bsize - 1;
 	res.p = (char *)malloc((max_len) * sizeof(char));
-	char i,j;
+	int i,j;
 	for (i = 0; i < max_len; i++) {
 		res.p[i] = 0;
 	}
-	for (i = 0; i < b.size; i++) {
-		if (b.p[i] != 0) {
+	for (i = 0; i < bsize; i++) {
+		if (b[i] != 0) {
 			for (j = 0; j < a.size; j++) {
 				if (a.p[j] != 0) {
-//					printf("%d %d %d\n", i, j, (res.p[i+j] + 1) % 2);
 					res.p[i+j] = (res.p[i+j] + 1) % 2;
 				}
 			}
@@ -101,26 +111,27 @@ polynom mult(polynom a, polynom b, polynom p) {
 			break;
 		}
 	}
-//	print("R", res);
-	while (res.size >= p.size) {
-		int dif = res.size - p.size;
-//		printf("%d %d %d\n", res.size, p.size, dif);
+	int g;
+	while ((g = get_grade(res)) >= p.size) {
+		int dif = g - p.size;
 		polynom biased = shift_left(p, dif);
-//		print("R", biased);
 		res = add(res, biased);
-//		print("R", res);
-
 	}
 
-	max_len = a.size + b.size - 1;
-	res.size = 0;
-	for (i = max_len; i >= 0; i--) {
-		if (res.p[i]) {
-			res.size = i + 1;
-			break;
-		}
-	}
+	res.size = result_size;
+//	max_len = a.size + bsize - 1;
+//	res.size = 0;
+//	for (i = max_len; i >= 0; i--) {
+//		if (res.p[i]) {
+//			res.size = i + 1;
+//			break;
+//		}
+//	}
 	return res;
+}
+
+polynom mult(polynom a, polynom b, polynom p) {
+	return mult_a(a, b.p, b.size, p);
 }
 
 /**
@@ -212,7 +223,7 @@ polynom get_gen_power(polynom generator, int pow, polynom primitive) {
 
 void print_poly_binary(polynom p, int ext_size) {
 	int i = 0;
-	for (i = ext_size; i >= 0; i--) {
+	for (i = ext_size-1; i >= 0; i--) {
 		if (i < p.size) {
 			printf("%d", p.p[i]);
 		} else {
@@ -367,62 +378,61 @@ void print_poly_binary(polynom p, int ext_size) {
 //	int SBOX_3[] = {0, 1, 38, 54, 37, 18, 43, 13, 20, 50, 25, 46, 42, 58, 15, 14, 32, 51, 5, 7, 47, 10, 34, 22, 12, 56, 2, 39, 24, 26, 62, 45, 28, 27, 35, 53, 8, 57, 31, 63, 4, 36, 16, 33, 11, 29, 55, 48, 41, 60, 21, 17, 23, 52, 3, 49, 9, 59, 30, 61, 44, 40, 19, 6};
 //	int SBOX_4[] = {4, 5, 41, 50, 63, 22, 31, 26, 52, 14, 13, 53, 36, 58, 11, 10, 28, 55, 1, 62, 45, 60, 49, 39, 20, 54, 27, 2, 46, 34, 3, 30, 8, 59, 48, 19, 43, 57, 25, 47, 61, 16, 24, 35, 51, 6, 56, 32, 12, 15, 29, 21, 38, 18, 7, 40, 17, 44, 23, 0, 42, 33, 9, 37};
 //	*/
-//	printf("char mixing_layer[][]={ {");
+//	printf("char mixing_layer[4][4][6]={ { {");
 //	polynom x = get_gen_power(generator, 45, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 61, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 23, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 29, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf("}, \n{");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}}, \n{{");
 //	x = get_gen_power(generator, 25, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 44, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 54, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 59, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf("}, \n{");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}}, \n{{");
 //	x = get_gen_power(generator, 56, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 5, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 18, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 8, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf("}, \n{");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}}, \n{{");
 //	x = get_gen_power(generator, 55, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 17, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 23, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf(", ");
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}, {");
 //	x = get_gen_power(generator, 16, primitive_p);
-//	print_poly_binary(x, primitive_p.size);
-//	printf("} };");
-//
+//	print_poly_binary(x, primitive_p.size - 1);
+//	printf("}} };");
 //	/*
-//	char mixing_layer[4][24]={
-//		{0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1},
-//		{0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0},
-//		{0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1},
-//		{0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1}
+//	char mixing_layer[4][4][6]={
+//	{{0, 0, 1, 0, 0, 0, 1, 1}, {0, 0, 1, 1, 1, 0, 1, 1}, {0, 0, 1, 1, 1, 0, 0, 0}, {0, 0, 1, 1, 1, 1, 0, 1}},
+//	{{0, 0, 0, 0, 1, 1, 0, 1}, {0, 0, 1, 1, 1, 1, 0, 0}, {0, 0, 0, 1, 0, 1, 1, 0}, {0, 0, 0, 1, 1, 0, 0, 0}},
+//	{{0, 0, 0, 0, 0, 0, 1, 1}, {0, 0, 1, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 1, 1, 1}, {0, 0, 1, 1, 0, 1, 1, 1}},
+//	{{0, 0, 1, 0, 1, 1, 0, 0}, {0, 0, 1, 0, 0, 1, 1, 0}, {0, 0, 1, 1, 1, 0, 0, 0}, {0, 0, 0, 1, 0, 0, 1, 1}}
 //	};
 //	*/
 //	return 0;
