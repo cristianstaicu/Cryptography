@@ -132,6 +132,16 @@ polynom initialize(char *p) {
 	return res;
 }
 
+
+char equals(polynom p, char *tst_string) {
+	int i;
+	for (i = 0; i < p.size; i++) {
+		if (p.p[p.size - i - 1] != tst_string[i] - '0')
+			return 0;
+	}
+	return 1;
+}
+
 /**
  * Print the polynom given as argument. The first argument p_name
  * is the name of the polynom (strictly for aestetics). If the polynom
