@@ -3,6 +3,7 @@ typedef struct {
 	char size;
 } polynom;
 
+polynom initialize(char *);
 void print(char *p_name, polynom p);
 void print_binary(char *p_name, polynom p);
 polynom add(polynom a, polynom b);

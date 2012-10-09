@@ -147,19 +147,10 @@ polynom BunnyTn(polynom m, polynom k) {
 }
 
 int main(int argc, char ** argv) {
-	char poly_init[7] = { 1, 1, 0, 1, 1, 0, 1};
-	primitive_p.p = poly_init;
-	primitive_p.size = 7;
 
-	char msg_init[24] = {1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1};
-	polynom message;
-	message.p = msg_init;
-	message.size = 24;
-
-	char key_init[24] = {0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0};
-	polynom key;
-	key.p = key_init;
-	key.size = 24;
+	primitive_p = initialize("1011011");
+	polynom message = initialize("111011100111110111111101");
+	polynom key = initialize("011111010100111001001100");
 
 	print_binary("K", key);
 	print_binary("M", message);

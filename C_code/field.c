@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "field.h"
 
 polynom primitive_p;
@@ -118,6 +119,17 @@ void print_binary(char *p_name, polynom p) {
 		printf("%d", p.p[i]);
 	}
 	printf("\n");
+}
+
+polynom initialize(char *p) {
+	polynom res;
+	res.size = strlen(p);
+	res.p = (char *) malloc(res.size * sizeof(char));
+	int i = 0;
+	for (i = 0; i < res.size; i++) {
+		res.p[res.size - i - 1] = p[i] - '0';
+	}
+	return res;
 }
 
 /**
