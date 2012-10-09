@@ -28,20 +28,11 @@ polynom add(polynom a, polynom b) {
 			copy(b.p, res.p, min_order, max_order);
 		}
 	}
-//	char same_order = (min_order == max_order);
 	char i = 0;
-//	char new_gd = 0;
 	for (i = 0; i < min_order; i++) {
 		res.p[i] = (a.p[i] + b.p[i]) % 2;
-//		if (same_order && res.p[i]) {
-//			new_gd = i;
-//		}
 	}
-//	if (min_order != max_order) {
-		res.size = max_order;
-//	} else {
-//		res.size = new_gd + 1;
-//	}
+	res.size = max_order;
 	return res;
 }
 
@@ -58,21 +49,15 @@ polynom shift_left(polynom a, char pos) {
 	return res;
 }
 
-polynom shift_right(polynom a, char pos) {
-	if (pos == 0) {
-		return a;
-	}
+polynom rotate(polynom p) {
 	polynom res;
-	if (pos > a.size) {
-		res.size = 0;
-		return res;
-	}
-	res.size = a.size - pos;
+	res.size = p.size;
 	res.p = (char *)malloc(res.size * sizeof(char));
 	int i;
-	for (i = 0; i < res.size; i++) {
-		res.p[i] = a.p[i+pos];
+	for (i = 0; i < res.size - 1; i++) {
+		res.p[i] = p.p[i+1];
 	}
+	res.p[res.size - 1] = p.p[0];
 	return res;
 }
 
@@ -119,19 +104,20 @@ polynom mult_a(polynom a, char b[], int bsize, polynom p) {
 	}
 
 	res.size = result_size;
-//	max_len = a.size + bsize - 1;
-//	res.size = 0;
-//	for (i = max_len; i >= 0; i--) {
-//		if (res.p[i]) {
-//			res.size = i + 1;
-//			break;
-//		}
-//	}
 	return res;
 }
 
 polynom mult(polynom a, polynom b, polynom p) {
 	return mult_a(a, b.p, b.size, p);
+}
+
+void print_binary(char *p_name, polynom p) {
+	printf("%s=", p_name);
+	int i = 0;
+	for (i = p.size - 1; i>=0; i--) {
+		printf("%d", p.p[i]);
+	}
+	printf("\n");
 }
 
 /**
