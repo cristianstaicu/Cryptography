@@ -55,10 +55,11 @@ polynom rotate(polynom p) {
 	res.size = p.size;
 	res.p = (char *)malloc(res.size * sizeof(char));
 	int i;
-	for (i = 0; i < res.size - 1; i++) {
-		res.p[i] = p.p[i+1];
+	char aux = p.p[res.size - 1];
+	for (i = 1; i <= res.size - 1; i++) {
+		res.p[i] = p.p[i-1];
 	}
-	res.p[res.size - 1] = p.p[0];
+	res.p[0] = aux;
 	return res;
 }
 

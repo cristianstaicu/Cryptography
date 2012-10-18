@@ -33,6 +33,15 @@ polynom Sbox4(polynom x) {
 	return get_poly_equivalent(b);
 }
 
+char* reverse(char* string, int size) {
+	char *res = (char *)malloc(size*sizeof(char));
+	int i = 0;
+	for (i = 0; i < size; i++) {
+		res[i] = string[size - i - 1];
+	}
+	return res;
+}
+
 /* The argument should be an array of polynoms of length 4. Each being in E! */
 polynom* MixingLayer(polynom *x) {
 	char mixing_layer[4][4][6]={
@@ -41,12 +50,11 @@ polynom* MixingLayer(polynom *x) {
 		{{0, 0, 0, 0, 1, 1}, {1, 0, 0, 0, 0, 0}, {0, 1, 0, 1, 1, 1}, {1, 1, 0, 1, 1, 1}},
 		{{1, 0, 1, 1, 0, 0}, {1, 0, 0, 1, 1, 0}, {1, 1, 1, 0, 0, 0}, {0, 1, 0, 0, 1, 1}}
 	};
-
 	int i = 0, j = 0;
 	polynom *r = (polynom *)malloc(4 * sizeof(polynom));
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
-			polynom aux = mult_a(x[4-i-1], mixing_layer[i][j], 6, primitive_p);
+			polynom aux = mult_a(x[j], reverse(mixing_layer[j][i], 6), 6, primitive_p);
 			if (j == 0) {
 				r[i] = aux;
 			} else {
@@ -63,10 +71,11 @@ polynom* split(polynom p, char pieces) {
 	int i = 0;
 	int l = p.size / pieces;
 	for (i = 0; i < pieces; i++) {
-		int index = l*i;
-		res[i].p = (char *) malloc (l * sizeof(char));
-		memcpy(res[i].p, p.p+index, l);
-		res[i].size = l;
+		int index = l * i;
+		int pos = pieces - i - 1;
+		res[pos].p = (char *) malloc (l * sizeof(char));
+		memcpy(res[pos].p, p.p + index, l);
+		res[pos].size = l;
 	}
 	return res;
 }
@@ -83,79 +92,96 @@ polynom concat(polynom *pieces, char no) {
 	int count = 0;
 	for (i = 0; i < no; i++) {
 		int j = 0;
-		for (j = 0; j < pieces[i].size; j++) {
-			res.p[count] = pieces[i].p[j];
+		for (j = 0; j < pieces[no - i - 1].size; j++) {
+			res.p[count] = pieces[no - i - 1].p[j];
 			count++;
 		}
 	}
 	return res;
 }
 
-polynom BunnyTn(polynom m, polynom k) {
-	polynom whitened = add(m, k);
+polynom* compute_keys(polynom key) {
 	/* key_w[0] is not used for consistency with the slides! 4 pieces
 	 * of key_w for each of the 15 key round */
-	polynom key_w[61];
+
+	polynom *res = (polynom *)malloc(16*sizeof(polynom));
+	polynom key_w[89];
 	polynom *key_sp;
-	key_sp = split(k, 4);
+	key_sp = split(key, 4);
 	int i = 0;
-	for (i = 1; i <= 4; i++) {
-		key_w[i] = key_sp[i - 1];
-	}
-	for (i = 5; i <= 7; i++) {
-		key_w[i] = add(Sbox1(key_w[i - 4]), key_w[i-3]);
-	}
-	key_w[8] = add(Sbox1(key_w[4]), key_w[3]);
-	int round = 0;
 	polynom k_pol;
 	char k_pol_init[6] = {0, 1, 0, 1, 0, 1};
 	k_pol.p = k_pol_init;
 	k_pol.size = 6;
+	for (i = 1; i <= 4; i++) {
+		key_w[i] = key_sp[i - 1];
+	}
+	for (i = 5; i <= 7; i++) {
+		if (i == 5)
+			key_w[i] = add(Sbox1(key_w[i - 4]), key_w[i-3]);
+		else if (i == 6)
+			key_w[i] = add(Sbox2(key_w[i - 4]), key_w[i-3]);
+		else if (i == 7)
+			key_w[i] = add(Sbox3(key_w[i - 4]), key_w[i-3]);
+	}
+	key_w[8] = add(Sbox4(key_w[4]), key_w[1]);
+	/* Compute values for W array */
+	for (i = 9; i <= 88; i++) {
+		if (i % 4 != 1) {
+			key_w[i] = add(key_w[i - 8], key_w[i - 1]);
+		} else if (i % 8 == 1) {
+			key_w[i] = add(key_w[i - 8], Sbox2(rotate(key_w[i - 1])));
+			key_w[i] = add(key_w[i], k_pol);
+		} else if (i % 8 == 5) {
+			key_w[i] = add(key_w[i - 8], Sbox3(key_w[i - 1]));
+		}
+	}
+	/* Construct round key */
+	for (i = 0; i < 16; i++) {
+		polynom key_p[4];
+		int j, ik = 0;
+		ik = i % 5 + 9 + (i/5) * 20;
+		for (j = 0; j <= 4; ik += 5, j++) {
+			key_p[j] = key_w[ik];
+		}
+		polynom k = concat(key_p, 4);
+		res[i] = k;
+	}
+	return res;
+}
+
+polynom BunnyTn(polynom m, polynom k) {
+	polynom *keys = compute_keys(k);
+	polynom whitened = add(m, keys[0]);
+	int round = 0;
 	polynom partial_result = whitened;
 	do {
 		round++;
 		polynom *msg_split = split(partial_result, 4);
-		msg_split[3] = Sbox1(msg_split[3]);
-		msg_split[2] = Sbox2(msg_split[2]);
-		msg_split[1] = Sbox3(msg_split[1]);
-		msg_split[0] = Sbox4(msg_split[0]);
+		msg_split[0] = Sbox1(msg_split[0]);
+		msg_split[1] = Sbox2(msg_split[1]);
+		msg_split[2] = Sbox3(msg_split[2]);
+		msg_split[3] = Sbox4(msg_split[3]);
 		polynom * msg_mixed = MixingLayer(msg_split);
 		polynom concated = concat(msg_mixed, 4);
-		/* Construct round key */
-		polynom key_p[4];
-		int j = 0;
-		for (i = round * 4 + 1; i <= (round + 1) * 4; i++, j++) {
-			key_p[j] = key_w[i];
-		}
-		if (round % 2 == 1) {
-			/* Compute next 8 values from W array */
-			for (i = round * 4 + 5; i <= (round + 3) * 4; i++) {
-				if (i % 4 != 1) {
-					key_w[i] = add(key_w[i - 8], key_w[i - 1]);
-				} else if (i % 8 == 1) {
-					key_w[i] = add(key_w[i - 8], Sbox1(rotate(key_w[i - 1])));
-					key_w[i] = add(key_w[i], k_pol);
-				} else if (i % 8 == 5) {
-					key_w[i] = add(key_w[i - 8], Sbox3(key_w[i - 1]));
-				}
-			}
-		}
-		polynom round_key = concat(key_p, 4);
+		polynom round_key = keys[round];
 		partial_result = add(concated, round_key);
 	} while (round < 15);
 	return partial_result;
 }
 
-int main(int argc, char ** argv) {
-
-	primitive_p = initialize("1011011");
-	polynom message = initialize("111011100111110111111101");
-	polynom key = initialize("011111010100111001001100");
-
-	print_binary("K", key);
-	print_binary("M", message);
-	polynom res = BunnyTn(message, key);
-	print_binary("C", res);
-
-	return 0;
-}
+//int main(int argc, char ** argv) {
+//
+//	primitive_p = initialize("1011011");
+////	polynom message = initialize("111011100111110111111101");
+//	polynom message = initialize("001001110101100000111100");
+////	polynom key = initialize("011111010100111001001100");
+//	polynom key = initialize("111101001101010011010000");
+//
+////	print_binary("K", key);
+////	print_binary("M", message);
+//	polynom res = BunnyTn(message, key);
+//	print_binary("C", res);
+//
+//	return 0;
+//}

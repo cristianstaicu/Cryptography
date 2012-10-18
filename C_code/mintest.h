@@ -1,8 +1,9 @@
 /* file: minunit.h - source: http://www.jera.com/techinfo/jtns/jtn002.html*/
 #define mu_assert(message, test) \
 	do { \
-		if (!(test)) \
-			return message; \
+		if (!(test)) { \
+			failed++;\
+			return message; } \
 	} while (0)
 
 #define mu_run_test(test) \
@@ -14,3 +15,4 @@
 	} while (0)
 
 extern int tests_run;
+extern int failed;
