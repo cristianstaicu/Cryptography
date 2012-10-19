@@ -84,6 +84,22 @@ static char * test_split_concat() {
 	return 0;
 }
 
+static char * test_inv_sboxs() {
+	polynom p = initialize("101010");
+	polynom inv_p = INV_Sbox1(p);
+	mu_assert("Sbox1 inverse not working!", equals(inv_p, "011100"));
+	p = initialize("100101");
+	inv_p = INV_Sbox2(p);
+	mu_assert("Sbox2 inverse not working!", equals(inv_p, "110010"));
+	p = initialize("100011");
+	inv_p = INV_Sbox3(p);
+	mu_assert("Sbox3 inverse not working!", equals(inv_p, "100010"));
+	p = initialize("001001");
+	inv_p = INV_Sbox4(p);
+	mu_assert("Sbox4 inverse not working!", equals(inv_p, "111110"));
+	return 0;
+}
+
 static char * all_tests() {
 	mu_run_test(test_addition);
 	mu_run_test(test_mult);
@@ -91,6 +107,7 @@ static char * all_tests() {
 	mu_run_test(test_mixing_layer);
 	mu_run_test(test_bunny_int);
 	mu_run_test(test_split_concat);
+	mu_run_test(test_inv_sboxs);
 	return 0;
 }
 

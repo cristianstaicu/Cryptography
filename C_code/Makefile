@@ -2,12 +2,13 @@ SERVER_OBJS=Debug/objs/server.o Debug/objs/common.o
 CLIENT_OBJS=Debug/objs//client.o Debug/objs/common.o
 BUNNY_OBJS=Debug/objs/bunny.o Debug/objs/field.o
 TESTS_OBJS=Debug/objs/tests.o Debug/objs/field.o
+INVERSE_OBJS=Debug/objs/mlcomputation.o Debug/objs/field.o
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=--std=c99 -g -pedantic -Wall -lm
 OBJDIR=Debug/objs
 SDIR=C_code
         
-all: server client tests
+all: server client tests inverse
 
 $(OBJDIR)/%.o: $(SDIR)/%.c 
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS) 
@@ -20,6 +21,9 @@ server: $(SERVER_OBJS)
 
 #bunny: $(BUNNY_OBJS)
 #	$(CC) $(BUNNY_OBJS) -o Debug/binaries/$@
+
+inverse: $(INVERSE_OBJS)
+	$(CC) $(INVERSE_OBJS) -o Debug/binaries/$@
 
 tests: $(TESTS_OBJS)
 	$(CC) $(TESTS_OBJS) -o Debug/binaries/$@

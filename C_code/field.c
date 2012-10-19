@@ -208,11 +208,24 @@ polynom get_poly_equiv(int p_int, int n) {
 	}
 }
 
-polynom get_poly_equivalent(int p_int) {
-	return get_poly_equiv(p_int, 0);
+polynom extend(polynom p, int size) {
+	polynom res;
+	res.p = (char *)malloc(size * sizeof(char));
+	res.size = size;
+	int i = 0;
+	for (i = 0; i < p.size; i++) {
+		res.p[i] = p.p[i];
+	}
+
+	return res;
 }
 
-int power(int a, int b) {
+polynom get_poly_equivalent(int p_int, int size) {
+	polynom p = get_poly_equiv(p_int, 0);
+	return extend(p, size);
+}
+
+int powr(int a, int b) {
 	int res = 1, i = 0;
 	while (i < b) {
 		 res *= a;

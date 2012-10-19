@@ -5,56 +5,96 @@
 
 polynom primitive_p;
 
+int POLY_SIZE = 6;
+
+int SBOX_1[] = {0, 1, 45, 54, 59, 18, 27, 30, 48, 10, 9, 49, 32, 62, 15, 14, 24, 51, 5, 58, 41, 56, 53, 35, 16, 50, 31, 6, 42, 38, 7, 26, 12, 63, 52, 23, 47, 61, 29, 43, 57, 20, 28, 39, 55, 2, 60, 36, 8, 11, 25, 17, 34, 22, 3, 44, 21, 40, 19, 4, 46, 37, 13, 33};
+int SBOX_2[] = {0, 1, 32, 51, 49, 3, 63, 31, 36, 4, 59, 9, 62, 45, 15, 14, 7, 5, 54, 38, 8, 57, 23, 52, 30, 61, 16, 33, 58, 42, 26, 24, 13, 43, 22, 34, 41, 60, 28, 27, 55, 48, 19, 6, 56, 12, 50, 20, 47, 10, 37, 18, 53, 35, 17, 21, 40, 44, 29, 11, 25, 46, 2, 39};
+int SBOX_3[] = {0, 1, 38, 54, 37, 18, 43, 13, 20, 50, 25, 46, 42, 58, 15, 14, 32, 51, 5, 7, 47, 10, 34, 22, 12, 56, 2, 39, 24, 26, 62, 45, 28, 27, 35, 53, 8, 57, 31, 63, 4, 36, 16, 33, 11, 29, 55, 48, 41, 60, 21, 17, 23, 52, 3, 49, 9, 59, 30, 61, 44, 40, 19, 6};
+int SBOX_4[] = {4, 5, 41, 50, 63, 22, 31, 26, 52, 14, 13, 53, 36, 58, 11, 10, 28, 55, 1, 62, 45, 60, 49, 39, 20, 54, 27, 2, 46, 34, 3, 30, 8, 59, 48, 19, 43, 57, 25, 47, 61, 16, 24, 35, 51, 6, 56, 32, 12, 15, 29, 21, 38, 18, 7, 40, 17, 44, 23, 0, 42, 33, 9, 37};
+
+polynom INV_Sbox(polynom x, int* S_BOX) {
+	int a = get_int_equivalent(x);
+	int i = 0;
+	int b;
+	for (i = 0; i < 64; i++) {
+		if (S_BOX[i] == a) {
+			b = i;
+			break;
+		}
+	}
+	return get_poly_equivalent(b, POLY_SIZE);
+}
+
+polynom INV_Sbox1(polynom x) {
+	return INV_Sbox(x, SBOX_1);
+}
+
+polynom INV_Sbox2(polynom x) {
+	return INV_Sbox(x, SBOX_2);
+}
+
+polynom INV_Sbox3(polynom x) {
+	return INV_Sbox(x, SBOX_3);
+}
+
+polynom INV_Sbox4(polynom x) {
+	return INV_Sbox(x, SBOX_4);
+}
+
 polynom Sbox1(polynom x) {
-	int SBOX_1[] = {0, 1, 45, 54, 59, 18, 27, 30, 48, 10, 9, 49, 32, 62, 15, 14, 24, 51, 5, 58, 41, 56, 53, 35, 16, 50, 31, 6, 42, 38, 7, 26, 12, 63, 52, 23, 47, 61, 29, 43, 57, 20, 28, 39, 55, 2, 60, 36, 8, 11, 25, 17, 34, 22, 3, 44, 21, 40, 19, 4, 46, 37, 13, 33};
 	int a = get_int_equivalent(x);
 	int b = SBOX_1[a];
-	return get_poly_equivalent(b);
+	return get_poly_equivalent(b, POLY_SIZE);
 }
 
 polynom Sbox2(polynom x) {
-	int SBOX_2[] = {0, 1, 32, 51, 49, 3, 63, 31, 36, 4, 59, 9, 62, 45, 15, 14, 7, 5, 54, 38, 8, 57, 23, 52, 30, 61, 16, 33, 58, 42, 26, 24, 13, 43, 22, 34, 41, 60, 28, 27, 55, 48, 19, 6, 56, 12, 50, 20, 47, 10, 37, 18, 53, 35, 17, 21, 40, 44, 29, 11, 25, 46, 2, 39};
 	int a = get_int_equivalent(x);
 	int b = SBOX_2[a];
-	return get_poly_equivalent(b);
+	return get_poly_equivalent(b, POLY_SIZE);
 }
 
 polynom Sbox3(polynom x) {
-	int SBOX_3[] = {0, 1, 38, 54, 37, 18, 43, 13, 20, 50, 25, 46, 42, 58, 15, 14, 32, 51, 5, 7, 47, 10, 34, 22, 12, 56, 2, 39, 24, 26, 62, 45, 28, 27, 35, 53, 8, 57, 31, 63, 4, 36, 16, 33, 11, 29, 55, 48, 41, 60, 21, 17, 23, 52, 3, 49, 9, 59, 30, 61, 44, 40, 19, 6};
 	int a = get_int_equivalent(x);
 	int b = SBOX_3[a];
-	return get_poly_equivalent(b);
+	return get_poly_equivalent(b, POLY_SIZE);
 }
 
 polynom Sbox4(polynom x) {
-	int SBOX_4[] = {4, 5, 41, 50, 63, 22, 31, 26, 52, 14, 13, 53, 36, 58, 11, 10, 28, 55, 1, 62, 45, 60, 49, 39, 20, 54, 27, 2, 46, 34, 3, 30, 8, 59, 48, 19, 43, 57, 25, 47, 61, 16, 24, 35, 51, 6, 56, 32, 12, 15, 29, 21, 38, 18, 7, 40, 17, 44, 23, 0, 42, 33, 9, 37};
 	int a = get_int_equivalent(x);
 	int b = SBOX_4[a];
-	return get_poly_equivalent(b);
-}
-
-char* reverse(char* string, int size) {
-	char *res = (char *)malloc(size*sizeof(char));
-	int i = 0;
-	for (i = 0; i < size; i++) {
-		res[i] = string[size - i - 1];
-	}
-	return res;
+	return get_poly_equivalent(b, POLY_SIZE);
 }
 
 /* The argument should be an array of polynoms of length 4. Each being in E! */
 polynom* MixingLayer(polynom *x) {
-	char mixing_layer[4][4][6]={
-		{{1, 0, 0, 0, 1, 1}, {1, 1, 1, 0, 1, 1}, {1, 1, 1, 0, 0, 0}, {1, 1, 1, 1, 0, 1}},
-		{{0, 0, 1, 1, 0, 1}, {1, 1, 1, 1, 0, 0}, {0, 1, 0, 1, 1, 0}, {0, 1, 1, 0, 0, 0}},
-		{{0, 0, 0, 0, 1, 1}, {1, 0, 0, 0, 0, 0}, {0, 1, 0, 1, 1, 1}, {1, 1, 0, 1, 1, 1}},
-		{{1, 0, 1, 1, 0, 0}, {1, 0, 0, 1, 1, 0}, {1, 1, 1, 0, 0, 0}, {0, 1, 0, 0, 1, 1}}
+	polynom ml11 = initialize("100011");
+	polynom ml12 = initialize("111011");
+	polynom ml13 = initialize("111000");
+	polynom ml14 = initialize("111101");
+	polynom ml21 = initialize("001101");
+	polynom ml22 = initialize("111100");
+	polynom ml23 = initialize("010110");
+	polynom ml24 = initialize("011000");
+	polynom ml31 = initialize("000011");
+	polynom ml32 = initialize("100000");
+	polynom ml33 = initialize("010111");
+	polynom ml34 = initialize("110111");
+	polynom ml41 = initialize("101100");
+	polynom ml42 = initialize("100110");
+	polynom ml43 = initialize("111000");
+	polynom ml44 = initialize("010011");
+
+	polynom mixing_layer[4][4]={
+		{ml11, ml12, ml13, ml14},
+		{ml21, ml22, ml23, ml24},
+		{ml31, ml32, ml33, ml34},
+		{ml41, ml42, ml43, ml44}
 	};
 	int i = 0, j = 0;
 	polynom *r = (polynom *)malloc(4 * sizeof(polynom));
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
-			polynom aux = mult_a(x[j], reverse(mixing_layer[j][i], 6), 6, primitive_p);
+			polynom aux = mult(x[j], mixing_layer[j][i], primitive_p);
 			if (j == 0) {
 				r[i] = aux;
 			} else {
