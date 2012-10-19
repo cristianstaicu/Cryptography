@@ -6,6 +6,7 @@
 polynom primitive_p;
 
 int POLY_SIZE = 6;
+int NO_ROUNDS = 15;
 
 int SBOX_1[] = {0, 1, 45, 54, 59, 18, 27, 30, 48, 10, 9, 49, 32, 62, 15, 14, 24, 51, 5, 58, 41, 56, 53, 35, 16, 50, 31, 6, 42, 38, 7, 26, 12, 63, 52, 23, 47, 61, 29, 43, 57, 20, 28, 39, 55, 2, 60, 36, 8, 11, 25, 17, 34, 22, 3, 44, 21, 40, 19, 4, 46, 37, 13, 33};
 int SBOX_2[] = {0, 1, 32, 51, 49, 3, 63, 31, 36, 4, 59, 9, 62, 45, 15, 14, 7, 5, 54, 38, 8, 57, 23, 52, 30, 61, 16, 33, 58, 42, 26, 24, 13, 43, 22, 34, 41, 60, 28, 27, 55, 48, 19, 6, 56, 12, 50, 20, 47, 10, 37, 18, 53, 35, 17, 21, 40, 44, 29, 11, 25, 46, 2, 39};
@@ -63,6 +64,10 @@ polynom Sbox4(polynom x) {
 	int a = get_int_equivalent(x);
 	int b = SBOX_4[a];
 	return get_poly_equivalent(b, POLY_SIZE);
+}
+
+polynom* InvMixingLayer(polynom *x) {
+	return x;
 }
 
 /* The argument should be an array of polynoms of length 4. Each being in E! */
@@ -190,6 +195,26 @@ polynom* compute_keys(polynom key) {
 	return res;
 }
 
+polynom DecBunnyTn(polynom c, polynom k) {
+	polynom *keys = compute_keys(k);
+	polynom partial_result = c;
+	int round = 0;
+	do {
+		round++;
+		partial_result = add(partial_result, keys[NO_ROUNDS - round + 1]);
+		polynom *msg_split = split(partial_result, 4);
+		polynom * msg_mixed = InvMixingLayer(msg_split);
+		msg_mixed[0] = INV_Sbox1(msg_split[0]);
+		msg_mixed[1] = INV_Sbox2(msg_mixed[1]);
+		msg_mixed[2] = INV_Sbox3(msg_mixed[2]);
+		msg_mixed[3] = INV_Sbox4(msg_mixed[3]);
+		polynom concated = concat(msg_mixed, 4);
+		partial_result = concated;
+	} while (round < NO_ROUNDS);
+	polynom dewhitened = add(partial_result, keys[0]);
+	return dewhitened;
+}
+
 polynom BunnyTn(polynom m, polynom k) {
 	polynom *keys = compute_keys(k);
 	polynom whitened = add(m, keys[0]);
@@ -204,9 +229,8 @@ polynom BunnyTn(polynom m, polynom k) {
 		msg_split[3] = Sbox4(msg_split[3]);
 		polynom * msg_mixed = MixingLayer(msg_split);
 		polynom concated = concat(msg_mixed, 4);
-		polynom round_key = keys[round];
-		partial_result = add(concated, round_key);
-	} while (round < 15);
+		partial_result = add(concated, keys[round]);
+	} while (round < NO_ROUNDS);
 	return partial_result;
 }
 
