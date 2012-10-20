@@ -58,6 +58,11 @@ static char * test_mixing_layer() {
 	mu_assert("ML applied on e2 is wrong!", equals(res[1], "001000"));
 	mu_assert("ML applied on e3 is wrong!", equals(res[2], "101100"));
 	mu_assert("ML applied on e4 is wrong!", equals(res[3], "110111"));
+	res = InvMixingLayer(res);
+	mu_assert("INVML applied on e1 is wrong!", equals(res[0], "110011"));
+	mu_assert("INVML applied on e2 is wrong!", equals(res[1], "100100"));
+	mu_assert("INVML applied on e3 is wrong!", equals(res[2], "000101"));
+	mu_assert("INVML applied on e4 is wrong!", equals(res[3], "100000"));
 	return 0;
 }
 
@@ -84,6 +89,8 @@ static char * test_split_concat() {
 	return 0;
 }
 
+
+
 static char * test_inv_sboxs() {
 	polynom p = initialize("101010");
 	polynom inv_p = INV_Sbox1(p);
@@ -100,6 +107,14 @@ static char * test_inv_sboxs() {
 	return 0;
 }
 
+static char * test_dec_bunny_int() {
+	polynom c = initialize("111110010000010001100110");
+	polynom k = initialize("111101001101010011010000");
+	polynom m = DecBunnyTn(c,k);
+	mu_assert("You've got yourself a sad bunny -> bad decryption! :(", equals(m,"001001110101100000111100"));
+	return 0;
+}
+
 static char * all_tests() {
 	mu_run_test(test_addition);
 	mu_run_test(test_mult);
@@ -108,6 +123,7 @@ static char * all_tests() {
 	mu_run_test(test_bunny_int);
 	mu_run_test(test_split_concat);
 	mu_run_test(test_inv_sboxs);
+	mu_run_test(test_dec_bunny_int);
 	return 0;
 }
 

@@ -66,8 +66,21 @@ polynom Sbox4(polynom x) {
 	return get_poly_equivalent(b, POLY_SIZE);
 }
 
-polynom* InvMixingLayer(polynom *x) {
-	return x;
+polynom* apply_matrix(polynom *x, polynom ** ml) {
+	int i = 0, j = 0;
+	polynom *r = (polynom *)malloc(4 * sizeof(polynom));
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			polynom aux = mult(x[j], ml[j][i], primitive_p);
+			if (j == 0) {
+				r[i] = aux;
+			} else {
+				r[i] = add(r[i], aux);
+ 			}
+		}
+	}
+
+	return r;
 }
 
 /* The argument should be an array of polynoms of length 4. Each being in E! */
@@ -89,26 +102,71 @@ polynom* MixingLayer(polynom *x) {
 	polynom ml43 = initialize("111000");
 	polynom ml44 = initialize("010011");
 
-	polynom mixing_layer[4][4]={
-		{ml11, ml12, ml13, ml14},
-		{ml21, ml22, ml23, ml24},
-		{ml31, ml32, ml33, ml34},
-		{ml41, ml42, ml43, ml44}
-	};
-	int i = 0, j = 0;
-	polynom *r = (polynom *)malloc(4 * sizeof(polynom));
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 4; j++) {
-			polynom aux = mult(x[j], mixing_layer[j][i], primitive_p);
-			if (j == 0) {
-				r[i] = aux;
-			} else {
-				r[i] = add(r[i], aux);
- 			}
-		}
+	polynom ** mixing_layer = (polynom**)malloc(4 * sizeof(polynom*));
+	int index = 0;
+	for (index = 0;index<4;++index) {
+		mixing_layer[index] = (polynom*)malloc(4 * sizeof(polynom));
 	}
+	mixing_layer[0][0] = ml11;
+	mixing_layer[0][1] = ml12;
+	mixing_layer[0][2] = ml13;
+	mixing_layer[0][3] = ml14;
+	mixing_layer[1][0] = ml21;
+	mixing_layer[1][1] = ml22;
+	mixing_layer[1][2] = ml23;
+	mixing_layer[1][3] = ml24;
+	mixing_layer[2][0] = ml31;
+	mixing_layer[2][1] = ml32;
+	mixing_layer[2][2] = ml33;
+	mixing_layer[2][3] = ml34;
+	mixing_layer[3][0] = ml41;
+	mixing_layer[3][1] = ml42;
+	mixing_layer[3][2] = ml43;
+	mixing_layer[3][3] = ml44;
+	return apply_matrix(x, mixing_layer);
+}
 
-	return r;
+polynom* InvMixingLayer(polynom *x) {
+	polynom ml11 = initialize("011101");
+	polynom ml12 = initialize("000011");
+	polynom ml13 = initialize("001011");
+	polynom ml14 = initialize("011001");
+	polynom ml21 = initialize("010001");
+	polynom ml22 = initialize("101111");
+	polynom ml23 = initialize("111110");
+	polynom ml24 = initialize("111101");
+	polynom ml31 = initialize("000111");
+	polynom ml32 = initialize("010111");
+	polynom ml33 = initialize("111001");
+	polynom ml34 = initialize("001100");
+	polynom ml41 = initialize("001010");
+	polynom ml42 = initialize("111010");
+	polynom ml43 = initialize("001101");
+	polynom ml44 = initialize("101001");
+
+	polynom ** inv_mixing_layer = (polynom**)malloc(4 * sizeof(polynom*));
+	int index = 0;
+	for (index = 0;index<4;++index) {
+		inv_mixing_layer[index] = (polynom*)malloc(4 * sizeof(polynom));
+	}
+	inv_mixing_layer[0][0] = ml11;
+	inv_mixing_layer[0][1] = ml12;
+	inv_mixing_layer[0][2] = ml13;
+	inv_mixing_layer[0][3] = ml14;
+	inv_mixing_layer[1][0] = ml21;
+	inv_mixing_layer[1][1] = ml22;
+	inv_mixing_layer[1][2] = ml23;
+	inv_mixing_layer[1][3] = ml24;
+	inv_mixing_layer[2][0] = ml31;
+	inv_mixing_layer[2][1] = ml32;
+	inv_mixing_layer[2][2] = ml33;
+	inv_mixing_layer[2][3] = ml34;
+	inv_mixing_layer[3][0] = ml41;
+	inv_mixing_layer[3][1] = ml42;
+	inv_mixing_layer[3][2] = ml43;
+	inv_mixing_layer[3][3] = ml44;
+
+	return apply_matrix(x, inv_mixing_layer);
 }
 
 polynom* split(polynom p, char pieces) {
@@ -204,7 +262,7 @@ polynom DecBunnyTn(polynom c, polynom k) {
 		partial_result = add(partial_result, keys[NO_ROUNDS - round + 1]);
 		polynom *msg_split = split(partial_result, 4);
 		polynom * msg_mixed = InvMixingLayer(msg_split);
-		msg_mixed[0] = INV_Sbox1(msg_split[0]);
+		msg_mixed[0] = INV_Sbox1(msg_mixed[0]);
 		msg_mixed[1] = INV_Sbox2(msg_mixed[1]);
 		msg_mixed[2] = INV_Sbox3(msg_mixed[2]);
 		msg_mixed[3] = INV_Sbox4(msg_mixed[3]);
