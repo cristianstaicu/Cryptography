@@ -136,6 +136,5 @@ int main(int argc, char ** argv) {
 		printf("ALL TESTS PASSED\n");
 	}
 	printf("Tests run: %d\nTests failed: %d\n", tests_run, failed);
-
 	return result != 0;
 }

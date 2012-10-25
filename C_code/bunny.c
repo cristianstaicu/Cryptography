@@ -169,6 +169,7 @@ polynom* InvMixingLayer(polynom *x) {
 	return apply_matrix(x, inv_mixing_layer);
 }
 
+/* Split a given polynomial in a number of pieces. */
 polynom* split(polynom p, char pieces) {
 	polynom *res = (polynom *)malloc(pieces*sizeof(polynom));
 	int i = 0;
@@ -291,19 +292,3 @@ polynom BunnyTn(polynom m, polynom k) {
 	} while (round < NO_ROUNDS);
 	return partial_result;
 }
-
-//int main(int argc, char ** argv) {
-//
-//	primitive_p = initialize("1011011");
-////	polynom message = initialize("111011100111110111111101");
-//	polynom message = initialize("001001110101100000111100");
-////	polynom key = initialize("011111010100111001001100");
-//	polynom key = initialize("111101001101010011010000");
-//
-////	print_binary("K", key);
-////	print_binary("M", message);
-//	polynom res = BunnyTn(message, key);
-//	print_binary("C", res);
-//
-//	return 0;
-//}
