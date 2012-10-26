@@ -2,6 +2,7 @@
 //#include "field.h"
 #include "mintest.h"
 #include "bunny.c"
+#include "lsfr.c"
 
 int tests_run = 0;
 int failed = 0;
@@ -115,6 +116,23 @@ static char * test_dec_bunny_int() {
 	return 0;
 }
 
+
+static char * test_cipher_block_chaining() {
+	char *m = "100100011010001010110";
+	char *iv = "10001111001001110011001";
+	char *k = "11100110010100100000100";
+	char *c = "111000011110100";
+	polynom p = cipher_block_chaining(m, iv, k);
+	mu_assert("Cipher block chaining is not working!", equals(p, c));
+	return 0;
+}
+
+static char * test_lsfr() {
+	char *res = lsfr("1011", "1000", 4);
+	mu_assert("LSFR is not working!", equal(res, ""));
+	return 0;
+}
+
 static char * all_tests() {
 	mu_run_test(test_addition);
 	mu_run_test(test_mult);
@@ -124,6 +142,8 @@ static char * all_tests() {
 	mu_run_test(test_split_concat);
 	mu_run_test(test_inv_sboxs);
 	mu_run_test(test_dec_bunny_int);
+	mu_run_test(test_cipher_block_chaining);
+	mu_run_test(test_lsfr);
 	return 0;
 }
 

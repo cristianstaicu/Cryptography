@@ -11,6 +11,7 @@ polynom add(polynom a, polynom b);
 polynom mult(polynom a, polynom b, polynom p);
 int get_int_equivalent(polynom p);
 polynom get_poly_equivalent(int p_int, int size);
+polynom shift_left(polynom a, char pos);
 polynom rotate(polynom);
 
 
