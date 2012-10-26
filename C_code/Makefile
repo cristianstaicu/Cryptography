@@ -8,7 +8,7 @@ CFLAGS=--std=c99 -g -pedantic -Wall -lm
 OBJDIR=Debug/objs
 SDIR=C_code
         
-all: server client tests inverse
+all: server client tests 
 
 $(OBJDIR)/%.o: $(SDIR)/%.c 
 	$(CC) -c $(INC) -o $@ $< $(CFLAGS) 
@@ -22,8 +22,8 @@ server: $(SERVER_OBJS)
 #bunny: $(BUNNY_OBJS)
 #	$(CC) $(BUNNY_OBJS) -o Debug/binaries/$@
 
-inverse: $(INVERSE_OBJS)
-	$(CC) $(INVERSE_OBJS) -o Debug/binaries/$@
+#inverse: $(INVERSE_OBJS)
+#	$(CC) $(INVERSE_OBJS) -o Debug/binaries/$@
 
 tests: $(TESTS_OBJS)
 	$(CC) $(TESTS_OBJS) -o Debug/binaries/$@
