@@ -85,15 +85,18 @@ int get_grade(polynom p) {
 	return -1;
 }
 
+/* Multiply the two polynomials (a,b) using the primitive polynomial (p) */
 polynom mult(polynom a, polynom b, polynom p) {
 	int result_size = p.size - 1;
 	polynom res;
 	int max_len = a.size + b.size - 1;
+	/* Initialize */
 	res.p = (char *)malloc((max_len) * sizeof(char));
 	int i,j;
 	for (i = 0; i < max_len; i++) {
 		res.p[i] = 0;
 	}
+	/* Multiplication similar with the decimal one*/
 	for (i = 0; i < b.size; i++) {
 		if (b.p[i] != 0) {
 			for (j = 0; j < a.size; j++) {
@@ -103,6 +106,7 @@ polynom mult(polynom a, polynom b, polynom p) {
 			}
 		}
 	}
+	/* Find the grade */
 	res.size = 0;
 	for (i = max_len-1; i >= 0; i--) {
 		if (res.p[i]) {
@@ -110,6 +114,7 @@ polynom mult(polynom a, polynom b, polynom p) {
 			break;
 		}
 	}
+	/* Divide by the primitive polynom */
 	int g;
 	while ((g = get_grade(res)) >= p.size) {
 		int dif = g - p.size;
