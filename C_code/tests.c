@@ -129,7 +129,7 @@ static char * test_cipher_block_chaining() {
 
 static char * test_lsfr() {
 	char *res = lsfr("1011", "1000", 4);
-	mu_assert("LSFR is not working!", equal(res, ""));
+	mu_assert("LSFR is not working!", equals(res, ""));
 	return 0;
 }
 
