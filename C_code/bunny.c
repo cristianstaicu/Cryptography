@@ -315,48 +315,6 @@ polynom cipher_block_chaining(char *message, char *iv, char *key) {
 	return res;
 }
 
-char* hex_to_bin(char * in) {
-	int size = strlen(in) * 4 + 1;
-	char *res = (char *)malloc(size * sizeof(char));
-	int i;
-	int pos = 0;
-	int l = strlen(in);
-	for (i = 0; i < l; i++) {
-		int value;
-		char ch = in[i];
-		if (ch >= '0' && ch <= '9')
-			value = ch - '0';
-		else if (ch >= 'A' && ch <= 'F')
-			value = ch - 'A' + 10;
-		else if (ch >= 'a' && ch <= 'f')
-			value = ch - 'a' + 10;
-		printf("%d\n", value);
-		if (value & 8)
-			res[pos] = '1';
-		else
-			res[pos] = '0';
-		if (value & 4)
-			res[pos + 1] = '1';
-		else
-			res[pos + 1] = '0';
-		if (value & 2)
-			res[pos + 2] = '1';
-		else
-			res[pos + 2] = '0';
-		if (value & 1)
-			res[pos + 3] = '1';
-		else
-			res[pos + 3] = '0';
-
-		res += 4;
-	}
-	res[size - 1] = '\0';
-	for (i = 0; i < size; i++) {
-		printf("%c", res[i]);
-	}
-	return res;
-}
-
 char * bin_to_hex(char * in, int size) {
 	char *res = (char *)malloc(size * sizeof(char));
 	return res;
@@ -364,9 +322,6 @@ char * bin_to_hex(char * in, int size) {
 
 char* cipher_block_chaining_hex(char *message, char *iv, char *key) {
 	polynom res;
-	char * bin_msg = hex_to_bin(message);
-	char * bin_key = hex_to_bin(key);
-	char * bin_iv = hex_to_bin(iv);
-	res = cipher_block_chaining(bin_msg, bin_iv, bin_key);
+	res = cipher_block_chaining(message, iv, key);
 	bin_to_hex(res.p, res.size);
 }

@@ -116,20 +116,65 @@ static char * test_dec_bunny_int() {
 	return 0;
 }
 
-
-static char * test_cipher_block_chaining() {
-	char *m = "100100011010001010110";
-	char *iv = "10001111001001110011001";
-	char *k = "11100110010100100000100";
-	char *c = "111000011110100";
-	polynom p = cipher_block_chaining(m, iv, k);
-	mu_assert("Cipher block chaining is not working!", equals(p, c));
+static char * test_lsfr() {
+	char *res = lsfr("1011", "101", 10);
+	mu_assert("LSFR is not working!", strcmp(res, "1100101110") == 0);
+	res = lsfr("1011", "110", 10);
+	mu_assert("LSFR is not working!", strcmp(res, "1001011100") == 0);
+	res = lsfr("101000000001", "10111100011", 20);
+	mu_assert("LSFR is not working!", strcmp(res, "10101100100100011110") == 0);
 	return 0;
 }
 
-static char * test_lsfr() {
-	char *res = lsfr("1011", "1000", 4);
-	mu_assert("LSFR is not working!", strcmp(res, "0011") == 0);
+const char* quads[] = {"0000", "0001", "0010", "0011", "0100", "0101",
+                     "0110", "0111", "1000", "1001", "1010", "1011",
+                     "1100", "1101", "1110", "1111"};
+
+const char * hex_to_bin_quad(unsigned char c)
+{
+  if (c >= '0' && c <= '9') return quads[     c - '0'];
+  if (c >= 'A' && c <= 'F') return quads[10 + c - 'A'];
+  if (c >= 'a' && c <= 'f') return quads[10 + c - 'a'];
+  return -1;
+}
+
+char * hex_to_binary(char* hex_array) {
+	int len = strlen(hex_array);
+	char *res = (char*)malloc(len*4*sizeof(char));
+	int i = 0;
+	for (i = 0; i < len; i++ ) {
+		char *quad = hex_to_bin_quad(hex_array[i]);
+		int j;
+		for (j = 0; j < 4; j++) {
+			res[i * 4 + j] = quad[j];
+		}
+	}
+	return res;
+}
+
+char * binary_to_hex(char * bin_array) {
+	int len = strlen(bin_array);
+	int i,j = 0;
+	char *res = (char*)malloc((len/4) * sizeof(char));
+	for (i = 0; i < len; i+=4) {
+		int n = bin_array[i] + bin_array[i + 1] * 2 + bin_array[i + 2] * 4 + bin_array[i + 3] * 8;
+		if (n < 10) {
+			res[j++] = '0' + n;
+		} else {
+			res[j++] = 'A' + (n - 10);
+		}
+	}
+}
+
+static char * hex_to_bin_test() {
+	char *res = hex_to_binary("faC0");
+	mu_assert("Hex to bin conversion is not working!", strcmp(res, "1111101011000000") == 0);
+	return 0;
+}
+
+static char * test_cipher_block_chaining() {
+	polynom p = cipher_block_chaining(hex_to_binary("123456"), hex_to_binary("479399"), hex_to_binary("732904"));
+	mu_assert("Cipher block chaining is not working!", equals(p, "0070F4"));
 	return 0;
 }
 
@@ -142,8 +187,9 @@ static char * all_tests() {
 	mu_run_test(test_split_concat);
 	mu_run_test(test_inv_sboxs);
 	mu_run_test(test_dec_bunny_int);
-//	mu_run_test(test_cipher_block_chaining);
 	mu_run_test(test_lsfr);
+	mu_run_test(hex_to_bin_test);
+	mu_run_test(test_cipher_block_chaining);
 	return 0;
 }
 
