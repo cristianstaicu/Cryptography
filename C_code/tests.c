@@ -140,7 +140,7 @@ const char * hex_to_bin_quad(unsigned char c)
 
 char * hex_to_binary(char* hex_array) {
 	int len = strlen(hex_array);
-	char *res = (char*)malloc(len*4*sizeof(char));
+	char *res = (char*)malloc((len*4+1)*sizeof(char));
 	int i = 0;
 	for (i = 0; i < len; i++ ) {
 		char *quad = hex_to_bin_quad(hex_array[i]);
@@ -149,32 +149,39 @@ char * hex_to_binary(char* hex_array) {
 			res[i * 4 + j] = quad[j];
 		}
 	}
+	res[len*4 + 1] = 0;
 	return res;
 }
 
 char * binary_to_hex(char * bin_array) {
 	int len = strlen(bin_array);
 	int i,j = 0;
-	char *res = (char*)malloc((len/4) * sizeof(char));
+	char *res = (char*)malloc((len/4 + 1) * sizeof(char));
 	for (i = 0; i < len; i+=4) {
-		int n = bin_array[i] + bin_array[i + 1] * 2 + bin_array[i + 2] * 4 + bin_array[i + 3] * 8;
+		int n = (bin_array[i]-'0')*8 + (bin_array[i + 1]-'0') * 4 + (bin_array[i + 2]-'0') * 2 + (bin_array[i + 3]-'0');
 		if (n < 10) {
 			res[j++] = '0' + n;
 		} else {
 			res[j++] = 'A' + (n - 10);
 		}
 	}
+	res[len/4] = 0;
+	return res;
 }
 
 static char * hex_to_bin_test() {
 	char *res = hex_to_binary("faC0");
+	mu_assert("Hex to bin conversion is not working!", strlen(res) == 16);
 	mu_assert("Hex to bin conversion is not working!", strcmp(res, "1111101011000000") == 0);
+	res = binary_to_hex(res);
+	mu_assert("Bin to hex conversion is not working!", strcmp(res, "FAC0") == 0);
 	return 0;
 }
 
 static char * test_cipher_block_chaining() {
+	mu_assert("Hex to bin failed!", strlen(hex_to_binary("123456")) == 24);
 	polynom p = cipher_block_chaining(hex_to_binary("123456"), hex_to_binary("479399"), hex_to_binary("732904"));
-	mu_assert("Cipher block chaining is not working!", equals(p, "0070F4"));
+	mu_assert("Cipher block chaining is not working!", equals(p, binary_to_hex("0070F4")));
 	return 0;
 }
 

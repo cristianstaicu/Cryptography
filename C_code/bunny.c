@@ -5,8 +5,9 @@
 
 polynom primitive_p;
 
-int POLY_SIZE = 6;
-int NO_ROUNDS = 15;
+const int POLY_SIZE = 6;
+const int NO_ROUNDS = 15;
+const int BLOCK_SIZE = 24;
 
 int SBOX_1[] = {0, 1, 45, 54, 59, 18, 27, 30, 48, 10, 9, 49, 32, 62, 15, 14, 24, 51, 5, 58, 41, 56, 53, 35, 16, 50, 31, 6, 42, 38, 7, 26, 12, 63, 52, 23, 47, 61, 29, 43, 57, 20, 28, 39, 55, 2, 60, 36, 8, 11, 25, 17, 34, 22, 3, 44, 21, 40, 19, 4, 46, 37, 13, 33};
 int SBOX_2[] = {0, 1, 32, 51, 49, 3, 63, 31, 36, 4, 59, 9, 62, 45, 15, 14, 7, 5, 54, 38, 8, 57, 23, 52, 30, 61, 16, 33, 58, 42, 26, 24, 13, 43, 22, 34, 41, 60, 28, 27, 55, 48, 19, 6, 56, 12, 50, 20, 47, 10, 37, 18, 53, 35, 17, 21, 40, 44, 29, 11, 25, 46, 2, 39};
@@ -297,11 +298,11 @@ polynom cipher_block_chaining(char *message, char *iv, char *key) {
 	/* the message length should be multiple of 24 */
 	polynom m = initialize(message);
 	polynom k = initialize(key);
-	char diff = 24 - (m.size % 24);
+	char diff = BLOCK_SIZE - (m.size % BLOCK_SIZE);
 	if (diff != 0) {
 		m = shift_left(m, diff);
 	}
-	int pieces = m.size / 24;
+	int pieces = m.size / BLOCK_SIZE;
 	polynom *split_message = split(m, pieces);
 	int i = 0;
 	polynom c = initialize(iv);
