@@ -299,7 +299,7 @@ polynom cipher_block_chaining(char *message, char *iv, char *key) {
 	polynom m = initialize(message);
 	polynom k = initialize(key);
 	char diff = BLOCK_SIZE - (m.size % BLOCK_SIZE);
-	if (diff != 0) {
+	if (diff != 24) {
 		m = shift_left(m, diff);
 	}
 	int pieces = m.size / BLOCK_SIZE;

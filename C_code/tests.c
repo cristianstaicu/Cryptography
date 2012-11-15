@@ -181,7 +181,25 @@ static char * hex_to_bin_test() {
 static char * test_cipher_block_chaining() {
 	mu_assert("Hex to bin failed!", strlen(hex_to_binary("123456")) == 24);
 	polynom p = cipher_block_chaining(hex_to_binary("123456"), hex_to_binary("479399"), hex_to_binary("732904"));
-	mu_assert("Cipher block chaining is not working!", equals(p, binary_to_hex("0070F4")));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("0070F4")));
+	p = cipher_block_chaining(hex_to_binary("123456a"), hex_to_binary("7C89A6"), hex_to_binary("AC6B46"));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("BCEC1CD46DE1")));
+	p = cipher_block_chaining(hex_to_binary("123456aa"), hex_to_binary("985854"), hex_to_binary("2B9BD3"));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("EE815ACB6E8D")));
+	p = cipher_block_chaining(hex_to_binary("123456aaa"), hex_to_binary("977D38"), hex_to_binary("AB614F"));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("7901FB1BA6D4")));
+	p = cipher_block_chaining(hex_to_binary("123456aaaa"), hex_to_binary("6AC642"), hex_to_binary("F8275D"));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("FA71CEDF5E76")));
+	p = cipher_block_chaining(hex_to_binary("123456aaaaa"), hex_to_binary("0EF91F"), hex_to_binary("98846D"));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("BC9320EB5504")));
+	p = cipher_block_chaining(hex_to_binary("123456aaaaaa"), hex_to_binary("42551B"), hex_to_binary("77C989"));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("C797C44F2FDB")));
+	p = cipher_block_chaining(hex_to_binary("123456aaaaaaa"), hex_to_binary("5E3E14"), hex_to_binary("C1196C"));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("44C372B882B04971C0")));
+	p = cipher_block_chaining(hex_to_binary("123456aaaaaaaa"), hex_to_binary("1A0F5F"), hex_to_binary("C6B107"));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("F5980C958B84516B86")));
+	p = cipher_block_chaining(hex_to_binary("123456aaaaaaaaa"), hex_to_binary("95DDB3"), hex_to_binary("ABD6FE"));
+	mu_assert("Cipher block chaining is not working!", equals(p, hex_to_binary("C0D43E7B7962E87347")));
 	return 0;
 }
 
