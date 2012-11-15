@@ -1,8 +1,7 @@
 #include <stdio.h>
-//#include "field.h"
 #include "mintest.h"
 #include "bunny.c"
-#include "lsfr.c"
+#include "maj5.h"
 
 int tests_run = 0;
 int failed = 0;
@@ -209,6 +208,12 @@ static char * test_cipher_block_chaining_dec() {
 	return 0;
 }
 
+static char * test_maj5() {
+	char * res = MAJ5(hex_to_binary("48C4A2E691D5B3F7"), 228);
+	mu_assert("MAJ5 is not working!", strcmp(binary_to_hex(res), "2E4ED25CBB2DDF55B8277286A7D07EB160C252B6B936DEAEC95C3C2CC") == 0);
+	return 0;
+}
+
 static char * all_tests() {
 	mu_run_test(test_addition);
 	mu_run_test(test_mult);
@@ -222,6 +227,7 @@ static char * all_tests() {
 	mu_run_test(hex_to_bin_test);
 	mu_run_test(test_cipher_block_chaining);
 	mu_run_test(test_cipher_block_chaining_dec);
+	mu_run_test(test_maj5);
 	return 0;
 }
 

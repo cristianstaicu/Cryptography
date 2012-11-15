@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "lsfr.h"
 
 char * transform(char *x) {
 	int l = strlen(x);
