@@ -294,7 +294,7 @@ polynom BunnyTn(polynom m, polynom k) {
 	return partial_result;
 }
 
-polynom cipher_block_chaining(char *message, char *iv, char *key) {
+polynom cipher_block_chaining_enc(char *message, char *iv, char *key) {
 	/* the message length should be multiple of 24 */
 	polynom m = initialize(message);
 	polynom k = initialize(key);
@@ -316,6 +316,26 @@ polynom cipher_block_chaining(char *message, char *iv, char *key) {
 	return res;
 }
 
+/* We assume that ciphertext length is a multiple of BLOCK_SIZE*/
+polynom cipher_block_chaining_dec(char *ciphertext, char *iv, char *key) {
+	/* the ciphertext length should be multiple of 24 */
+	polynom c = initialize(ciphertext);
+	polynom k = initialize(key);
+	int pieces = c.size / BLOCK_SIZE;
+	polynom *split_ciphertext = split(c, pieces);
+	int i = 0;
+	polynom x = initialize(iv);
+	polynom *result = (polynom *)malloc(pieces*sizeof(polynom));
+	for (i = 0; i < pieces; i++) {
+		polynom p = DecBunnyTn(split_ciphertext[i], k);
+		p = add(x, p);
+		result[i] = p;
+		x = split_ciphertext[i];
+	}
+	polynom res = concat(result, pieces);
+	return res;
+}
+
 char * bin_to_hex(char * in, int size) {
 	char *res = (char *)malloc(size * sizeof(char));
 	return res;
@@ -323,6 +343,6 @@ char * bin_to_hex(char * in, int size) {
 
 char* cipher_block_chaining_hex(char *message, char *iv, char *key) {
 	polynom res;
-	res = cipher_block_chaining(message, iv, key);
+	res = cipher_block_chaining_enc(message, iv, key);
 	bin_to_hex(res.p, res.size);
 }
