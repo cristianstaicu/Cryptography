@@ -5,9 +5,9 @@
 #define dim_v1 19
 #define dim_v2 22
 #define dim_v3 23
+#define key_length 64
+#define frame_vector_length 22
 
-char key_length = 64;
-char frame_vector_length = 22;
 
 
 char lsfr_1[dim_v1];
@@ -28,7 +28,7 @@ char taps_3[4] = {7,20,21,22};
 /*
  *  Step1 - of A5/1 - Initialization of vectors
  */
-void initialize_vectors (char *vector, int size){
+void step1 (char *vector, int size){
 	int i;
 
 	for (i=0; i < size; i++){
@@ -162,4 +162,27 @@ char* step_5 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3, int output_leng
 		output[i] = xor3(lsfr_vec1[dim_v1-1], lsfr_vec2[dim_v2-1], lsfr_vec3[dim_v3-1]);
 		step_4(lsfr_vec1, lsfr_vec2, lsfr_vec3);
 	}
+}
+
+/*
+ * a51 protocol, which use previous functions to work
+ */
+char* a51 (char* key, int n){
+	char* register_1 = lsfr_1;
+	char* register_2 = lsfr_2;
+	char* register_3 = lsfr_3;
+	char frame_vector[] = {0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	char output[n];
+
+	step1(register_1, dim_v1);
+	step1(register_2, dim_v2);
+	step1(register_3, dim_v3);
+
+	step_2()(key);
+
+	step_3(frame_vector);
+	step_4(register_1, register_2, register_3);
+	step_5(register_1, register_2, register_3, n, output);
+
+	return output;
 }
