@@ -9,6 +9,7 @@ int size_lsfr_3 = 23;
 char key_length = 64;
 char frame_vector_length = 22;
 
+
 char lsfr_1[size_lsfr_1] = {};
 char lsfr_2[size_lsfr_2] = {};
 char lsfr_3[size_lsfr_3] = {};
@@ -17,9 +18,11 @@ int sync_1 = 8;
 int sync_2 = 10;
 int sync_3 = 10;
 
-int taps_1[] = {13,16,17,18};
-int taps_2[] = {20,21};
-int taps_3[] = {7,20,21,22};
+char sync_vector[3] = {0,0,0};
+
+int taps_1[4] = {13,16,17,18};
+int taps_2[2] = {20,21};
+int taps_3[4] = {7,20,21,22};
 
 
 /*
@@ -110,5 +113,52 @@ void step_3 (char *frame_vector){
 
 }
 
+/*
+ * input: lsfr vectors
+ * output: modified sync vector
+ *
+ * We pass the lsfr vectors, we check in their sync_bits, and we write in sync vector
+ * which value they have (remember that it's initialized to 0, so we modified it just if the sync bits are equal to 1
+ */
+void fill_sync_vector (char* lsfr_vector1, char* lsfr_vector2, char* lsfr_vector3, char* sync_vector ){
+	int i = 0;
+	int zero_counter = 0;
+	if (lsfr_vector1[sync_1]==1){
+		sync_vector[0] = 1;
+	}
+	if (lsfr_vector2[sync_2]==1){
+		sync_vector[1] = 1;
+	}
+	if (lsfr_vector2[sync_2]==1){
+			sync_vector[2] = 1;
+	}
+}
 
+/*
+ * input: sync vector
+ * output: re-initialized sync vector
+ *
+ * After we applied fill_sync_vector, and we use its results, we should re-initialize the vector before usint
+ * fill_sync_vector again
+ */
+void format_sync_vector (char* sync_vector){
+	int i;
+	for (i=0; i < 3; i++){
+		sync_vector[i]=0;
+	}
+}
+
+
+/*
+ *
+ */
+
+
+
+/*
+ * step 4 of the process. 100 iterations of check_sync_bits + xor operation.
+ */
+void step_4 (){
+
+}
 
