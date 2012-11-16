@@ -14,9 +14,9 @@ char lsfr_1[size_lsfr_1] = {};
 char lsfr_2[size_lsfr_2] = {};
 char lsfr_3[size_lsfr_3] = {};
 
-int sync_1 = 8;
-int sync_2 = 10;
-int sync_3 = 10;
+char sync_1 = 8;
+char sync_2 = 10;
+char sync_3 = 10;
 
 char sync_vector[3] = {0,0,0};
 
@@ -48,46 +48,38 @@ int xor (int x, int y){
  */
 int tap_xor_iteration (char* lsfr_vector, char* tap_array, int array_size) {
 	int result = 0;
-	int x;
+	char x;
+	char y;
 	for ( ; array_size >= 0 ; array_size--){
 		x = tap_array[array_size];
-		result = xor(result, x);
+		y = lsfr_vector[x];
+		result = xor(result, y);
 	}
 	return result;
 }
 
-/*
- * Shift the vector by one, and add in pos 0 the result of the xor
- * TODO fix it, doesn't return anything - fix the function
- *
-void shift_lsfr (char* state, int state_size ,int xor_result){
-	char next_state[state_size] = {};
-	int j;
-	for (j = 1; j < state_size; j++) {
-		next_state[j] = state[j - 1];
+void shift_LSFR( char state[], int state_size, char res ) {
+	for (j = state_size - 1; j > 0 ; j--) {
+		state[j] = state[j - 1];
 	}
-	next_state[0] = xor_result;
+	state[0] = res;
 }
-*/
-/*
- * (this process must be done 64 times - number of the bit of the key)
- * Iterate every lsfr vector -> do the xor with the taps of the vector and store in res (an integer)
- * Do xor statement with res and the current bit of the key
- * Add the result to the lsfr vector using the shift statement
- */
+
 void step_2 (char *key){
 	int i;
-	int res;
+	char res1;
+	char res2;
+	char res3;
 	for (i=0; i < key_length; i++){
-		res = tap_xor_iteration(lsfr_1, taps_1);	//tap iteration = xor between taps within the vector
-		res = xor(res,key[i]);						//xor with the current bit value of the key
-		shift_lsfr(lsfr_1, size_lsfr_1, res);		//shift the vector and put in the result
-		res = tap_xor_iteration(lsfr_2, taps_2);
-		res = xor(res,key[i]);
-		shift_lsfr(lsfr_2, size_lsfr_2, res);
-		res = tap_xor_iteration(lsfr_3, taps_3);
-		res = xor(res,key[i]);
-		shift_lsfr(lsfr_3, size_lsfr_3, res);
+		res1 = tap_xor_iteration(lsfr_1, taps_1);	//tap iteration = xor between taps within the vector
+		res1 = xor(res,key[i]);						//xor with the current bit value of the key
+		shift_lsfr(lsfr_1, size_lsfr_1, res1);		//shift the vector and put in the result
+		res2 = tap_xor_iteration(lsfr_2, taps_2);
+		res2 = xor(res,key[i]);
+		shift_lsfr(lsfr_2, size_lsfr_2, res2);
+		res3 = tap_xor_iteration(lsfr_3, taps_3);
+		res3 = xor(res,key[i]);
+		shift_lsfr(lsfr_3, size_lsfr_3, res3);
 	}
 }
 
@@ -98,55 +90,32 @@ void step_2 (char *key){
  */
 void step_3 (char *frame_vector){
 	int i;
-	int res;
+	char res1, res2, res3;
 	for (i=0; i < frame_vector_length; i++){
-		res = tap_xor_iteration(lsfr_1, taps_1);	//tap iteration = xor between taps within the vector
-		res = xor(res,frame_vector[i]);				//xor with the current bit value of the frame_vector
-		shift_lsfr(lsfr_1, size_lsfr_1, res);		//shift the vector and put in the result
-		res = tap_xor_iteration(lsfr_2, taps_2);
-		res = xor(res,frame_vector[i]);
-		shift_lsfr(lsfr_2, size_lsfr_2, res);
-		res = tap_xor_iteration(lsfr_3, taps_3);
-		res = xor(res,frame_vector[i]);
-		shift_lsfr(lsfr_3, size_lsfr_3, res);
+		res1 = tap_xor_iteration(lsfr_1, taps_1);	//tap iteration = xor between taps within the vector
+		res1= xor(res,frame_vector[i]);				//xor with the current bit value of the frame_vector
+		shift_lsfr(lsfr_1, size_lsfr_1, res1);		//shift the vector and put in the result
+		res2 = tap_xor_iteration(lsfr_2, taps_2);
+		res2 = xor(res,frame_vector[i]);
+		shift_lsfr(lsfr_2, size_lsfr_2, res2);
+		res3 = tap_xor_iteration(lsfr_3, taps_3);
+		res3 = xor(res,frame_vector[i]);
+		shift_lsfr(lsfr_3, size_lsfr_3, res3);
 	}
 
 }
 
-/*
- * input: lsfr vectors
- * output: modified sync vector
- *
- * We pass the lsfr vectors, we check in their sync_bits, and we write in sync vector
- * which value they have (remember that it's initialized to 0, so we modified it just if the sync bits are equal to 1
- */
-void fill_sync_vector (char* lsfr_vector1, char* lsfr_vector2, char* lsfr_vector3, char* sync_vector ){
-	int i = 0;
-	int zero_counter = 0;
-	if (lsfr_vector1[sync_1]==1){
-		sync_vector[0] = 1;
-	}
-	if (lsfr_vector2[sync_2]==1){
-		sync_vector[1] = 1;
-	}
-	if (lsfr_vector2[sync_2]==1){
-			sync_vector[2] = 1;
-	}
-}
 
 /*
- * input: sync vector
- * output: re-initialized sync vector
- *
- * After we applied fill_sync_vector, and we use its results, we should re-initialize the vector before usint
- * fill_sync_vector again
+ * get the majority of bits -> if the majority it's 1 then i'll return 1, 0 otherwise
  */
-void format_sync_vector (char* sync_vector){
-	int i;
-	for (i=0; i < 3; i++){
-		sync_vector[i]=0;
-	}
+char get_majority_bit(char b1, char b2, char b3) {
+	char sum = b1 + b2 + b3;
+	if (sum > 1)
+		return 1;
+	return 0;
 }
+
 
 /*
  *
@@ -159,7 +128,11 @@ void format_sync_vector (char* sync_vector){
  */
 void step_4 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3){
 	int i;
-	for (i=0, i < 100; i++){
+	int maj_bit = 0;
+	for (i=0; i<100; i++){
+		maj_bit = get_majority_bit(sync_1, size_lsfr_2, sync_3);
+		if(lsfr_vec1[sync_1]==maj_bit){
+		}
 	}
 }
 
