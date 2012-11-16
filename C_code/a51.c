@@ -178,7 +178,7 @@ char* a51 (char* key, int n){
 	step1(register_2, dim_v2);
 	step1(register_3, dim_v3);
 
-	step_2()(key);
+	step_2(key);
 
 	step_3(frame_vector);
 	step_4(register_1, register_2, register_3);
