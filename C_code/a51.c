@@ -5,9 +5,9 @@
 #define dim_v1 19
 #define dim_v2 22
 #define dim_v3 23
+#define key_length 64
+#define frame_vector_length 22
 
-char key_length = 64;
-char frame_vector_length = 22;
 
 
 char lsfr_1[dim_v1];
@@ -28,7 +28,7 @@ char taps_3[4] = {7,20,21,22};
 /*
  *  Step1 - of A5/1 - Initialization of vectors
  */
-void initialize_vectors (char *vector, int size){
+void step1 (char *vector, int size){
 	int i;
 
 	for (i=0; i < size; i++){
@@ -40,6 +40,13 @@ void initialize_vectors (char *vector, int size){
  */
 int xor (int x, int y){
 	return (x+y)%2;
+}
+
+int xor3 (int x, int y, int z){
+	int res;
+	res = (x+y)%2;
+	res = (res+z)%2;
+	return res;
 }
 
 /*
@@ -117,30 +124,65 @@ char get_majority_bit_a51(char b1, char b2, char b3) {
 	return 0;
 }
 
-
-/*
- *
- */
-
-
-
 /*
  * step 4 of the process. 100 iterations of check_sync_bits + xor operation.
  */
 void step_4 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3){
 	int i;
 	int maj_bit = 0;
+	char res1;
+	char res2;
+	char res3;
 	for (i=0; i<100; i++){
-		maj_bit = get_majority_bit_a51(sync_1, dim_v2, sync_3);
+		maj_bit = get_majority_bit_a51(sync_1, sync_2, sync_3);
 		if(lsfr_vec1[sync_1-1]==maj_bit){
-
+			res1 = tap_xor_iteration(lsfr_1, taps_1, dim_v1);
+			shift_LSFR(lsfr_1, dim_v1, res1);
 		}
 		if(lsfr_vec2[sync_2-1]==maj_bit){
-
+			res2 = tap_xor_iteration(lsfr_2, taps_2, dim_v2);
+			shift_LSFR(lsfr_2, dim_v2, res2);
 		}
 		if(lsfr_vec3[sync_3-1]==maj_bit){
-
+			res3 = tap_xor_iteration(lsfr_3, taps_3, dim_v3);
+			shift_LSFR(lsfr_3, dim_v3, res3);
 		}
 	}
 }
 
+/*
+ * Output -> xor of positions 18-22-23 of vectors 1-2-3
+ * afterwards it's equal to the step 4
+ */
+char* step_5 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3, int output_length, char* output){
+	int i;
+	char maj_bit = 0;
+	char res1, res2, res3;
+	for (i=0; i < output_length; i++){
+		output[i] = xor3(lsfr_vec1[dim_v1-1], lsfr_vec2[dim_v2-1], lsfr_vec3[dim_v3-1]);
+		step_4(lsfr_vec1, lsfr_vec2, lsfr_vec3);
+	}
+}
+
+/*
+ * a51 protocol, which use previous functions to work
+ */
+char* a51 (char* key, int n){
+	char* register_1 = lsfr_1;
+	char* register_2 = lsfr_2;
+	char* register_3 = lsfr_3;
+	char frame_vector[] = {0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	char output[n];
+
+	step1(register_1, dim_v1);
+	step1(register_2, dim_v2);
+	step1(register_3, dim_v3);
+
+	step_2()(key);
+
+	step_3(frame_vector);
+	step_4(register_1, register_2, register_3);
+	step_5(register_1, register_2, register_3, n, output);
+
+	return output;
+}
