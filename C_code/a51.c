@@ -122,23 +122,29 @@ char get_majority_bit_a51(char b1, char b2, char b3) {
  *
  */
 
-
-
 /*
  * step 4 of the process. 100 iterations of check_sync_bits + xor operation.
  */
 void step_4 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3){
 	int i;
 	int maj_bit = 0;
+	char res1;
+	char res2;
+	char res3;
 	for (i=0; i<100; i++){
 		maj_bit = get_majority_bit_a51(sync_1, dim_v2, sync_3);
 		if(lsfr_vec1[sync_1-1]==maj_bit){
-
+			res1 = tap_xor_iteration(lsfr_1, taps_1, dim_v1);
+			shift_LSFR(lsfr_1, dim_v1, res1);
 		}
 		if(lsfr_vec2[sync_2-1]==maj_bit){
+			res2 = tap_xor_iteration(lsfr_2, taps_2, dim_v2);
+			shift_LSFR(lsfr_2, dim_v2, res2);
 
 		}
 		if(lsfr_vec3[sync_3-1]==maj_bit){
+			res3 = tap_xor_iteration(lsfr_3, taps_3, dim_v3);
+			shift_LSFR(lsfr_3, dim_v3, res3);
 
 		}
 	}
