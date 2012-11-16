@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "mintest.h"
-#include "bunny.c"
+#include "sponge.c"
 #include "all5.h"
 #include "maj5.h"
 
@@ -221,6 +221,11 @@ static char * test_all5() {
 	return 0;
 }
 
+static char * test_sponge() {
+	char * res = SPONGEBUNNY(hex_to_binary("48C4A2E691D5B3F7"));
+	return 0;
+}
+
 static char * all_tests() {
 	mu_run_test(test_addition);
 	mu_run_test(test_mult);
@@ -236,6 +241,7 @@ static char * all_tests() {
 	mu_run_test(test_cipher_block_chaining_dec);
 	mu_run_test(test_maj5);
 	mu_run_test(test_all5);
+	mu_run_test(test_sponge);
 	return 0;
 }
 
