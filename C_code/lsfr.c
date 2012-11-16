@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "lsfr.h"
 
 char * transform(char *x) {
 	int l = strlen(x);
@@ -61,4 +62,19 @@ char* lsfr(char *polynom, char *initial_state, int output_length) {
 	}
 
 	return transform_to_str(output, output_length);
+}
+
+void print_register(char *reg, int len) {
+	int i;
+	for (i = 0; i < len; i++) {
+		printf("%d", reg[i]);
+	}
+	printf("\n");
+}
+
+char get_majority_bit(char b1, char b2, char b3, char b4, char b5) {
+	char sum = b1 + b2 + b3 + b4 + b5;
+	if (sum > 2)
+		return 1;
+	return 0;
 }
