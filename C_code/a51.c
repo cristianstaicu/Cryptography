@@ -42,6 +42,13 @@ int xor (int x, int y){
 	return (x+y)%2;
 }
 
+int xor3 (int x, int y, int z){
+	int res;
+	res = (x+y)%2;
+	res = (res+z)%2;
+	return res;
+}
+
 /*
  * Xor statement between taps (starting from the end of the array)
  * how is it possible to see from http://it.wikipedia.org/w/index.php?title=File:A5-1_GSM_cipher.svg&page=1
@@ -117,11 +124,6 @@ char get_majority_bit_a51(char b1, char b2, char b3) {
 	return 0;
 }
 
-
-/*
- *
- */
-
 /*
  * step 4 of the process. 100 iterations of check_sync_bits + xor operation.
  */
@@ -132,7 +134,7 @@ void step_4 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3){
 	char res2;
 	char res3;
 	for (i=0; i<100; i++){
-		maj_bit = get_majority_bit_a51(sync_1, dim_v2, sync_3);
+		maj_bit = get_majority_bit_a51(sync_1, sync_2, sync_3);
 		if(lsfr_vec1[sync_1-1]==maj_bit){
 			res1 = tap_xor_iteration(lsfr_1, taps_1, dim_v1);
 			shift_LSFR(lsfr_1, dim_v1, res1);
@@ -140,13 +142,24 @@ void step_4 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3){
 		if(lsfr_vec2[sync_2-1]==maj_bit){
 			res2 = tap_xor_iteration(lsfr_2, taps_2, dim_v2);
 			shift_LSFR(lsfr_2, dim_v2, res2);
-
 		}
 		if(lsfr_vec3[sync_3-1]==maj_bit){
 			res3 = tap_xor_iteration(lsfr_3, taps_3, dim_v3);
 			shift_LSFR(lsfr_3, dim_v3, res3);
-
 		}
 	}
 }
 
+/*
+ * Output -> xor of positions 18-22-23 of vectors 1-2-3
+ * afterwards it's equal to the step 4
+ */
+char* step_5 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3, int output_length, char* output){
+	int i;
+	char maj_bit = 0;
+	char res1, res2, res3;
+	for (i=0; i < output_length; i++){
+		output[i] = xor3(lsfr_vec1[dim_v1-1], lsfr_vec2[dim_v2-1], lsfr_vec3[dim_v3-1]);
+		step_4(lsfr_vec1, lsfr_vec2, lsfr_vec3);
+	}
+}
