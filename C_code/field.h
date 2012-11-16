@@ -13,6 +13,7 @@ int get_int_equivalent(polynom p);
 polynom get_poly_equivalent(int p_int, int size);
 polynom shift_left(polynom a, char pos);
 polynom rotate(polynom);
+polynom shift_right(polynom a, char pos);
 
 
 

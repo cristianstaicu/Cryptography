@@ -60,6 +60,20 @@ polynom shift_left(polynom a, char pos) {
 	return res;
 }
 
+polynom shift_right(polynom a, char pos) {
+	if (pos <= 0)
+		return a;
+	polynom res;
+	res.size = a.size + pos;
+	/* Dynamic allocation */
+	res.p = (char *)malloc(res.size * sizeof(char));
+	int i;
+	for (i = 0; i < a.size; i++) {
+		res.p[i] = a.p[i];
+	}
+	return res;
+}
+
 /* Move the most important bit of the polynom on the first position + shift all the others left*/
 polynom rotate(polynom p) {
 	polynom res;
