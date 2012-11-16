@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "mintest.h"
 #include "bunny.c"
+#include "all5.h"
 #include "maj5.h"
 
 int tests_run = 0;
@@ -214,6 +215,12 @@ static char * test_maj5() {
 	return 0;
 }
 
+static char * test_all5() {
+	char * res = ALL5(hex_to_binary("48C4A2E691D5B3F7"), 228);
+	mu_assert("ALL5 is not working!", strcmp(binary_to_hex(res), "291203071AA0318E45A288A297684B2008A1421A3A1D1811029E20972") == 0);
+	return 0;
+}
+
 static char * all_tests() {
 	mu_run_test(test_addition);
 	mu_run_test(test_mult);
@@ -228,6 +235,7 @@ static char * all_tests() {
 	mu_run_test(test_cipher_block_chaining);
 	mu_run_test(test_cipher_block_chaining_dec);
 	mu_run_test(test_maj5);
+	mu_run_test(test_all5);
 	return 0;
 }
 
