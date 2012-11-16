@@ -1,7 +1,7 @@
 SERVER_OBJS=Debug/objs/server.o Debug/objs/common.o
 CLIENT_OBJS=Debug/objs//client.o Debug/objs/common.o
 BUNNY_OBJS=Debug/objs/bunny.o Debug/objs/field.o
-TESTS_OBJS=Debug/objs/tests.o Debug/objs/field.o Debug/objs/lsfr.o  Debug/objs/all5.o  
+TESTS_OBJS=Debug/objs/tests.o Debug/objs/field.o Debug/objs/lsfr.o  Debug/objs/all5.o Debug/objs/a51.o  
 CC=gcc
 CFLAGS=--std=c99 -g -pedantic -Wall -lm
 OBJDIR=Debug/objs
