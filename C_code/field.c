@@ -4,7 +4,7 @@
 #include "field.h"
 
 /*
- * Copy from the source char array to the dest one starting from start_pos to end_pos
+ * Copy from the  source char array to the dest one starting from start_pos to end_pos
  */
 void copy(char * source, char *dest, char start_pos, char end_pos) {
 	int i = 0;
