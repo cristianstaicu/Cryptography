@@ -46,7 +46,7 @@ int xor (int x, int y){
  * Xor statement between taps (starting from the end of the array)
  * how is it possible to see from http://it.wikipedia.org/w/index.php?title=File:A5-1_GSM_cipher.svg&page=1
  */
-void tap_xor_iteration (char* lsfr_vector, char* tap_array, int array_size) {
+int tap_xor_iteration (char* lsfr_vector, char* tap_array, int array_size) {
 	int result = 0;
 	int x;
 	for ( ; array_size >= 0 ; array_size--){
@@ -148,7 +148,6 @@ void format_sync_vector (char* sync_vector){
 	}
 }
 
-
 /*
  *
  */
@@ -158,7 +157,9 @@ void format_sync_vector (char* sync_vector){
 /*
  * step 4 of the process. 100 iterations of check_sync_bits + xor operation.
  */
-void step_4 (){
-
+void step_4 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3){
+	int i;
+	for (i=0, i < 100; i++){
+	}
 }
 
