@@ -90,7 +90,7 @@ char * ALL5(char *key, int n) {
 		char x4 = register4[p4.size - 2];
 		char x5 = register5[p5.size - 2];
 
-		result[i] = (x1 * x4 + x2 * x3 + x2 * x5 + x3 * x5) % 2;
+		result[i] = (x1 * x4 + x2 * x3 + x2 * x5 + x3 * x4) % 2;
 
 		shift_lsfr(p1.p, p1.size, register1, p1.size - 1);
 		shift_lsfr(p2.p, p2.size, register2, p2.size - 1);
