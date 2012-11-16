@@ -167,22 +167,35 @@ char* step_5 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3, int output_leng
 /*
  * a51 protocol, which use previous functions to work
  */
-char* a51 (char* key, int n){
+char* a51 (char* k, int n){
+	char *key = (char *)malloc(strlen(k) * sizeof(char));
+	int i = 0;
+	for (i = 0; i < strlen(k); i++) {
+		key[i] = k[i] -  '0';
+	}
 	char* register_1 = lsfr_1;
 	char* register_2 = lsfr_2;
 	char* register_3 = lsfr_3;
 	char frame_vector[] = {0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	char output[n];
+	char *output = (char *)malloc((n + 1) * sizeof(char));
 
 	step1(register_1, dim_v1);
 	step1(register_2, dim_v2);
 	step1(register_3, dim_v3);
 
 	step_2(key);
+//	for (i = 0; i < dim_v1; i++) {
+//		printf("%d", register_1[i]);
+//	}
+//	printf("\n");
 
 	step_3(frame_vector);
 	step_4(register_1, register_2, register_3);
 	step_5(register_1, register_2, register_3, n, output);
 
+	for (i = 0; i < n; i++) {
+		output[i] += '0';
+	}
+	output[n] = 0;
 	return output;
 }

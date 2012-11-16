@@ -234,6 +234,12 @@ static char * test_sponge() {
 	return 0;
 }
 
+static char * test_a51() {
+	char * res = a51(hex_to_binary("48C4A2E691D5B3F7"), 228);
+	mu_assert("ALL5 is not working!", strcmp(binary_to_hex(res), "A9A7552C17F40A8D5B70C2AD3946049FA6B46BABF6CA4DA65F20DBE35") == 0);
+	return 0;
+}
+
 static char * all_tests() {
 	mu_run_test(test_addition);
 	mu_run_test(test_mult);
@@ -250,6 +256,7 @@ static char * all_tests() {
 	mu_run_test(test_maj5);
 	mu_run_test(test_all5);
 	mu_run_test(test_sponge);
+	mu_run_test(test_a51);
 	return 0;
 }
 
