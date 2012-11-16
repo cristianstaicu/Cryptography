@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* The primitive polynom*/
+/* The primitive polynom */
 polynom primitive_p;
 
 const int POLY_SIZE = 6;
