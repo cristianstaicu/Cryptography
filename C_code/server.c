@@ -9,7 +9,7 @@ int open_fifo(const char * pathname)
 		exit(1);
 	}
 
-	/* Open the channel */
+	/* Open the channel  */
 	return (open_channel(pathname));
 }
 
