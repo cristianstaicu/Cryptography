@@ -7,7 +7,8 @@
 #define dim_v3 23
 #define key_length 64
 #define frame_vector_length 22
-
+#define tap_size_1_3 4
+#define tap_size_2 2
 
 
 char lsfr_1[dim_v1];
@@ -57,15 +58,15 @@ char tap_xor_iteration (char* lsfr_vector, char* tap_array, int array_size) {
 	char result = 0;
 	char x;
 	char y;
-	for ( ; array_size >= 0 ; array_size--){
-		x = tap_array[array_size];
+	for ( ; array_size > 0 ; array_size--){
+		x = tap_array[array_size-1];
 		y = lsfr_vector[(int)x];
 		result = xor(result, y);
 	}
 	return result;
 }
 
-void shift_LSFR( char state[], int state_size, char res ) {
+void shift_LSFR(char state[], int state_size, char res ) {
 	int j;
 	for (j = state_size - 1; j > 0 ; j--) {
 		state[j] = state[j - 1];
@@ -79,13 +80,13 @@ void step_2 (char *key){
 	char res2;
 	char res3;
 	for (i=0; i < key_length; i++){
-		res1 = tap_xor_iteration(lsfr_1, taps_1, dim_v1);	//tap iteration = xor between taps within the vector
-		res1 = xor(res1,key[i]);						//xor with the current bit value of the key
-		shift_LSFR(lsfr_1, dim_v1, res1);		//shift the vector and put in the result
-		res2 = tap_xor_iteration(lsfr_2, taps_2, dim_v2);
+		res1 = tap_xor_iteration(lsfr_1, taps_1, tap_size_1_3);	//tap iteration = xor between taps within the vector
+		res1 = xor(res1,key[i]);								//xor with the current bit value of the key
+		shift_LSFR(lsfr_1, dim_v1, res1);						//shift the vector and put in the result
+		res2 = tap_xor_iteration(lsfr_2, taps_2, tap_size_2);
 		res2 = xor(res2,key[i]);
 		shift_LSFR(lsfr_2, dim_v2, res2);
-		res3 = tap_xor_iteration(lsfr_3, taps_3, dim_v3);
+		res3 = tap_xor_iteration(lsfr_3, taps_3, tap_size_1_3);
 		res3 = xor(res3,key[i]);
 		shift_LSFR(lsfr_3, dim_v3, res3);
 	}
@@ -100,13 +101,13 @@ void step_3 (char *frame_vector){
 	int i;
 	char res1, res2, res3;
 	for (i=0; i < frame_vector_length; i++){
-		res1 = tap_xor_iteration(lsfr_1, taps_1, dim_v1);	//tap iteration = xor between taps within the vector
-		res1= xor(res1,frame_vector[i]);				//xor with the current bit value of the frame_vector
-		shift_LSFR(lsfr_1, dim_v1, res1);		//shift the vector and put in the result
-		res2 = tap_xor_iteration(lsfr_2, taps_2, dim_v2);
+		res1 = tap_xor_iteration(lsfr_1, taps_1, tap_size_1_3);	//tap iteration = xor between taps within the vector
+		res1= xor(res1,frame_vector[i]);					//xor with the current bit value of the frame_vector
+		shift_LSFR(lsfr_1, dim_v1, res1);					//shift the vector and put in the result
+		res2 = tap_xor_iteration(lsfr_2, taps_2, tap_size_2);
 		res2 = xor(res2,frame_vector[i]);
 		shift_LSFR(lsfr_2, dim_v2, res2);
-		res3 = tap_xor_iteration(lsfr_3, taps_3, dim_v3);
+		res3 = tap_xor_iteration(lsfr_3, taps_3, tap_size_1_3);
 		res3 = xor(res3,frame_vector[i]);
 		shift_LSFR(lsfr_3, dim_v3, res3);
 	}
@@ -134,17 +135,17 @@ void step_4 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3){
 	char res2;
 	char res3;
 	for (i=0; i<100; i++){
-		maj_bit = get_majority_bit_a51(sync_1, sync_2, sync_3);
-		if(lsfr_vec1[sync_1-1]==maj_bit){
-			res1 = tap_xor_iteration(lsfr_1, taps_1, dim_v1);
+		maj_bit = get_majority_bit_a51(lsfr_vec1[sync_1], lsfr_vec2[sync_2], lsfr_vec3[sync_3]);
+		if(lsfr_vec1[sync_1]==maj_bit){
+			res1 = tap_xor_iteration(lsfr_1, taps_1, tap_size_1_3);
 			shift_LSFR(lsfr_1, dim_v1, res1);
 		}
-		if(lsfr_vec2[sync_2-1]==maj_bit){
-			res2 = tap_xor_iteration(lsfr_2, taps_2, dim_v2);
+		if(lsfr_vec2[sync_2]==maj_bit){
+			res2 = tap_xor_iteration(lsfr_2, taps_2, tap_size_2);
 			shift_LSFR(lsfr_2, dim_v2, res2);
 		}
-		if(lsfr_vec3[sync_3-1]==maj_bit){
-			res3 = tap_xor_iteration(lsfr_3, taps_3, dim_v3);
+		if(lsfr_vec3[sync_3]==maj_bit){
+			res3 = tap_xor_iteration(lsfr_3, taps_3, tap_size_1_3);
 			shift_LSFR(lsfr_3, dim_v3, res3);
 		}
 	}
@@ -154,25 +155,33 @@ void step_4 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3){
  * Output -> xor of positions 18-22-23 of vectors 1-2-3
  * afterwards it's equal to the step 4
  */
-char* step_5 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3, int output_length, char* output){
+void step_5 (char* lsfr_vec1, char* lsfr_vec2, char* lsfr_vec3, int output_length, char* output){
 	int i;
-	char maj_bit = 0;
+	int maj_bit = 0;
 	char res1, res2, res3;
 	for (i=0; i < output_length; i++){
 		output[i] = xor3(lsfr_vec1[dim_v1-1], lsfr_vec2[dim_v2-1], lsfr_vec3[dim_v3-1]);
-		step_4(lsfr_vec1, lsfr_vec2, lsfr_vec3);
+		maj_bit = get_majority_bit_a51(lsfr_vec1[sync_1], lsfr_vec2[sync_2], lsfr_vec3[sync_3]);
+		if(lsfr_vec1[sync_1]==maj_bit){
+			res1 = tap_xor_iteration(lsfr_1, taps_1, tap_size_1_3);
+			shift_LSFR(lsfr_1, dim_v1, res1);
+		}
+		if(lsfr_vec2[sync_2]==maj_bit){
+			res2 = tap_xor_iteration(lsfr_2, taps_2, tap_size_2);
+			shift_LSFR(lsfr_2, dim_v2, res2);
+		}
+		if(lsfr_vec3[sync_3]==maj_bit){
+			res3 = tap_xor_iteration(lsfr_3, taps_3, tap_size_1_3);
+			shift_LSFR(lsfr_3, dim_v3, res3);
+		}
 	}
 }
 
 /*
  * a51 protocol, which use previous functions to work
  */
-char* a51 (char* k, int n){
-	char *key = (char *)malloc(strlen(k) * sizeof(char));
+char* a51 (char* key, int n){
 	int i = 0;
-	for (i = 0; i < strlen(k); i++) {
-		key[i] = k[i] -  '0';
-	}
 	char* register_1 = lsfr_1;
 	char* register_2 = lsfr_2;
 	char* register_3 = lsfr_3;
