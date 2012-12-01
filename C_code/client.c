@@ -1,4 +1,5 @@
 #include "common.h"
+#include <stdio.h>
 
 int main(int argc, char ** argv)
 {
@@ -9,7 +10,6 @@ int main(int argc, char ** argv)
 		fprintf(stderr,"client [server->client fifo] [client->server fifo] [password file] [username]\n");
 		exit(1);
 	}
-
 	/* Create connection with the server */
 	fprintf(stderr,"Create connection...\n");
 	sc_fifo_fd = open_channel(argv[1]);
@@ -27,6 +27,14 @@ int main(int argc, char ** argv)
 	write_msg(cs_fifo_fd,(const u_int8_t *)"A",1);
 
   // GET public rsa key of S, (s_puk,n), from "client_folder/server_rsa_public_key.txt"
+	long s_puk;
+	char *file_name;
+	FILE *filepointer;
+	//file_name = "C_code/client_folder/server_rsa_public_key.txt";
+	filepointer = fopen("C_code/client_folder/server_rsa_public_key.txt","r");
+
+	fscanf(filepointer, "%ld",&s_puk);
+	printf("%ld",s_puk);
   /* ... */
   // CREATE a random number r
   /* ... */
