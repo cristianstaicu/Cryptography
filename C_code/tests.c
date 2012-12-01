@@ -281,7 +281,7 @@ static char * test_a51() {
 }
 
 static char *test_prime_gen() {
-	BIGNUM *prime_no = get_long_prime_number(10);
+	BIGNUM *prime_no = get_long_prime_number(362187362178, 512);
 	BIO *out=BIO_new(BIO_s_file());
 	BIO_set_fp(out,stdout,BIO_NOCLOSE);
 //	BN_print(out, prime_no);
