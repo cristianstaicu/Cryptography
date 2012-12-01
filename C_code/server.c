@@ -2,7 +2,7 @@
 
 int open_fifo(const char * pathname)
 {
-	/* Recreate the FIFO in pathname */
+	/* Recreat xe the FIFO in pathname */
 	unlink(pathname);
 	if( mkfifo(pathname,0600) < 0 ) {
 		perror("mkfifo()");
