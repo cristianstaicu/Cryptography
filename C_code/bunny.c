@@ -296,7 +296,7 @@ polynom BunnyTn(polynom m, polynom k) {
 }
 
 polynom cipher_block_chaining_enc(char *message, char *iv, char *key) {
-	/* the message length should be multiple of 24 */
+	/* the message length should be multiple of 24 => padding */
 	polynom m = initialize(message);
 	polynom k = initialize(key);
 	char diff = BLOCK_SIZE - (m.size % BLOCK_SIZE);
