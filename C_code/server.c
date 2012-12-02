@@ -1,4 +1,5 @@
 #include "common.h"
+#include "stdio.h"
 
 int open_fifo(const char * pathname)
 {
@@ -22,7 +23,7 @@ int wait_connection(int channel_fd)
 	if( 	((msg_size = read_msg(channel_fd,&buff)) < 0) ||
 		(msg_size != strlen(CONNECTION_STRING) ||
 		strncasecmp((const char *)CONNECTION_STRING,(const char *)buff,msg_size)) ) {
-		/* Protocol error */
+		/* TODO Protocol error - if it doesn't read 'Hello' return -1*/
 		return (-1);
 	}
 
@@ -65,9 +66,14 @@ int main(int argc, char ** argv)
 		fprintf(stderr,"%c\n",buff[2]);
 
     // GET private rsa key of S, (s_prk,n) from "server_folder/server_rsa_private_key.txt"
-    /* ... */
+		FILE* file;
+		long long priv_key;
+		long long n;
+		char line[80];
+		file = fopen("server_folder/server_rsa_private_key.txt", "r");
+
     // READ c from S
-    /* ... */
+
     // DECRYPT c using (s_prk,n) -> r' = c^s_prk mod n
     /* ... */
     // SEND r' to C
