@@ -23,7 +23,7 @@ int wait_connection(int channel_fd)
 	if( 	((msg_size = read_msg(channel_fd,&buff)) < 0) ||
 		(msg_size != strlen(CONNECTION_STRING) ||
 		strncasecmp((const char *)CONNECTION_STRING,(const char *)buff,msg_size)) ) {
-		/* Protocol error */
+		/* TODO Protocol error - if it doesn't read 'Hello' return -1*/
 		return (-1);
 	}
 
@@ -73,7 +73,6 @@ int main(int argc, char ** argv)
 		file = fopen("server_folder/server_rsa_private_key.txt", "r");
 
     // READ c from S
-
 
     // DECRYPT c using (s_prk,n) -> r' = c^s_prk mod n
     /* ... */
