@@ -27,14 +27,16 @@ int main(int argc, char ** argv)
 	write_msg(cs_fifo_fd,(const u_int8_t *)"A",1);
 
   // GET public rsa key of S, (s_puk,n), from "client_folder/server_rsa_public_key.txt"
-	long s_puk;
-	char *file_name;
+	long s_puk,n;
+	//char *file_name;
 	FILE *filepointer;
 	//file_name = "C_code/client_folder/server_rsa_public_key.txt";
 	filepointer = fopen("C_code/client_folder/server_rsa_public_key.txt","r");
 
-	fscanf(filepointer, "%ld",&s_puk);
-	printf("%ld",s_puk);
+	fscanf(filepointer,"%ld %ch",&s_puk,&n);
+	printf("%ld\n","%ld",s_puk,n);
+
+
   /* ... */
   // CREATE a random number r
   /* ... */
