@@ -1,4 +1,5 @@
 #include "common.h"
+#include "stdio.h"
 
 int open_fifo(const char * pathname)
 {
@@ -65,9 +66,15 @@ int main(int argc, char ** argv)
 		fprintf(stderr,"%c\n",buff[2]);
 
     // GET private rsa key of S, (s_prk,n) from "server_folder/server_rsa_private_key.txt"
-    /* ... */
+		FILE* file;
+		long long priv_key;
+		long long n;
+		char line[80];
+		file = fopen("server_folder/server_rsa_private_key.txt", "r");
+
     // READ c from S
-    /* ... */
+
+
     // DECRYPT c using (s_prk,n) -> r' = c^s_prk mod n
     /* ... */
     // SEND r' to C
