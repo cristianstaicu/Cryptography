@@ -1,6 +1,7 @@
 #include "common.h"
 #include <stdio.h>
 
+/*TODO fix the problem: why it doesn't modify the variable passed (after the function is completed)*/
 void get_rsa_serv_pub_key (long* s_puk, long* n){
 	FILE *filepointer;
 	long array_data[2];
