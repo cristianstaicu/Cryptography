@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "mintest.h"
-#include "sponge.c"
 #include "all5.h"
 #include "maj5.h"
 #include <time.h>
@@ -270,6 +269,12 @@ static char * test_sponge() {
 	res = SPONGEBUNNY("01000111000011000011100111001111100110101111110011");
 	mu_assert("SPONGEBUNNY is not working!",
 			strcmp(res, "0110001110000111111100011011111010110101111011011011000000001101000001100100100001111110010100100100001110000100001101000110011010110101011000001000010001100100") == 0);
+	int i = 0;
+	polynom p = initialize("1000101010100100100010110000100111111100101011000001100101010110100111100101101000110001100010110010111100100001101101001100111000101010001101010111100110101100000010010101001010111110111001111001011000101101011011010101110111101001000010111010100011101111111110111000100101100111101000110111001001001001110011110000111111010101010000101110000110101111111111000101001111111011000001101101111110111110101110110010000100001110011111100000100101110001111000011011101010010110000101010010111010011110000110101000101000000001");
+	polynom r;
+	r = sponge_poly(p, 20);
+//	print_binary("",r);
+	mu_assert("sponge_poly not working", equals(r, "11010011000010001100"));
 	return 0;
 }
 
@@ -281,11 +286,21 @@ static char * test_a51() {
 }
 
 static char *test_prime_gen() {
-	BIGNUM *prime_no = get_long_prime_number(362187362178, 512);
+	BIGNUM *prime_no = get_long_prime_number(38362178, 512);
 	BIO *out=BIO_new(BIO_s_file());
 	BIO_set_fp(out,stdout,BIO_NOCLOSE);
-//	BN_print(out, prime_no);
-	printf("%s\n", BN_bn2dec(prime_no));
+	mu_assert("CSPRNG not working", strcmp(BN_bn2dec(prime_no), "2965176724656851839220370116884140168375810923886655990419267657610300066314101848643233278138166935770389908952050642963808793902904855433310166587886791") == 0);
+	return 0;
+}
+
+static char *test_transformations() {
+	polynom p;
+	p = initialize("00011011");
+	BIGNUM *n = transform_to_bignum(p);
+	mu_assert("Transformation poly -> BN not working", strcmp(BN_bn2dec(n), "27") == 0);
+	polynom poly = transform_to_poly(n);
+	mu_assert("Transformation BN -> poly not working", poly.size != 0);
+	mu_assert("Transformation BN -> poly not working", equals(poly,"00011011"));
 	return 0;
 }
 
@@ -305,8 +320,9 @@ static char * all_tests() {
 	mu_run_test(test_maj5);
 	mu_run_test(test_all5);
 	mu_run_test(test_sponge);
-	mu_run_test(test_prime_gen);
 	mu_run_test(test_a51);
+	mu_run_test(test_transformations);
+	mu_run_test(test_prime_gen);
 	return 0;
 }
 

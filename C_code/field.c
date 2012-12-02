@@ -13,6 +13,20 @@ void copy(char * source, char *dest, char start_pos, char end_pos) {
 	}
 }
 
+polynom truncate_poly(polynom a, int size) {
+	int i = 0;
+	polynom res;
+	res.size = size;
+	res.p = (char *) malloc(size * sizeof(char));
+	for (i = 0; i < size; i++) {
+		if (i < a.size)
+			res.p[i] = a.p[i];
+		else
+			res.p[i] = 0;
+	}
+	return res;
+}
+
 /* Add two polynoms possibly having different sizes. */
 polynom add(polynom a, polynom b) {
 
@@ -54,6 +68,9 @@ polynom shift_left(polynom a, char pos) {
 	/* Dynamic allocation */
 	res.p = (char *)malloc(res.size * sizeof(char));
 	int i;
+	for (i = 0; i < pos; i++) {
+		res.p[i] = 0;
+	}
 	for (i = 0; i < a.size; i++) {
 		res.p[i+pos] = a.p[i];
 	}
@@ -167,6 +184,21 @@ polynom initialize(char *p) {
 	return res;
 }
 
+polynom init_from_long(long x) {
+	int i = 0,j = 0;
+	char bits[140];
+	while (x > 0) {
+		bits[i++] = x % 2;
+		x = x / 2;
+	}
+	polynom res;
+	res.size = i;
+	res.p = (char *) malloc(res.size * sizeof(char));
+	for (j = 0; j < i; j++) {
+		res.p[j] = bits[j];
+	}
+	return res;
+}
 
 /* Check if each chars stored in polynom p is equal with the ones stored in the
  * char array given as param. */
@@ -249,6 +281,9 @@ polynom extend(polynom p, int size) {
 	int i = 0;
 	for (i = 0; i < p.size; i++) {
 		res.p[i] = p.p[i];
+	}
+	for (i = p.size; i < size; i++) {
+		res.p[i] = 0;
 	}
 
 	return res;

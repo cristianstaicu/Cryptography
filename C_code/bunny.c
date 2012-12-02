@@ -195,6 +195,9 @@ polynom concat(polynom *pieces, char no) {
 	polynom res;
 	res.p = (char *)malloc(total * sizeof(char));
 	res.size = total;
+	for (i = 0; i < total; i++) {
+		res.p[i] = 0;
+	}
 	int count = 0;
 	for (i = 0; i < no; i++) {
 		int j = 0;
