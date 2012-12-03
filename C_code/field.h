@@ -17,4 +17,3 @@ polynom rotate(polynom);
 polynom shift_right(polynom a, char pos);
 polynom truncate_poly(polynom a, int size);
 
-

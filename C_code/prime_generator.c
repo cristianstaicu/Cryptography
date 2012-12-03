@@ -1,5 +1,6 @@
-#include <openssl/bn.h>
-#include "sponge.c"
+#include <openssl/bio.h>
+#include "sponge.h"
+#include "prime_generator.h"
 
 /**
  * The CSPRGN is based on the NIST specification 800-90.

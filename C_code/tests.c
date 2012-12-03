@@ -2,8 +2,9 @@
 #include "mintest.h"
 #include "all5.h"
 #include "maj5.h"
+#include "sponge.h"
 #include <time.h>
-#include "prime_generator.c"
+#include "prime_generator.h"
 #include <openssl/bn.h>
 #include <openssl/bio.h>
 

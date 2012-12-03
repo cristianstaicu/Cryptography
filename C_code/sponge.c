@@ -1,5 +1,6 @@
-#include "bunny.c"
+#include "sponge.h"
 #include "lsfr.h"
+#include <stdlib.h>
 
 static const int BITRATE_LENGTH = 20;
 static const int STATE_LENGTH = 24;
