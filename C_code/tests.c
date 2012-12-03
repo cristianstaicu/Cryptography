@@ -4,6 +4,7 @@
 #include "maj5.h"
 #include <time.h>
 #include "prime_generator.h"
+#include "rsa.c"
 #include <openssl/bn.h>
 #include <openssl/bio.h>
 
@@ -305,6 +306,21 @@ static char *test_transformations() {
 	return 0;
 }
 
+static char *test_rsa() {
+	char *MSG =  "BAC03F";
+	BIGNUM *n = BN_new();
+	BN_hex2bn(&n, "1327D4FEA8411577878917E8C99180156C4450B7ACD55B50D96E356D20398C133BD032B32782AE38F629CDB8409ECB80421DCD5A90A2824DB3A2D68644F242827F162B85905B8FC93FF7AF4BF7BBCA5CFD9A492E07069534773C003FC04DCED88D82E84D8617219BB683DF1D9A0AF368226831A3F7E23C6C9DA68705ECDE2C47");
+	BIGNUM *e = BN_new();
+	BN_hex2bn(&e, "07");
+	BIGNUM *d = BN_new();
+	BN_hex2bn(&d, "0AF2309184B779FB28E09FF2BC53249E8702774462C30F9BE9F5D562EDD7BDC1D909418AF20188208CAA2C69497F4FB7013599EA9BCA939A1D819F282765DCDC890F4981DB462E75E3A560B283BD3C2C9A2727AB08AD64F1325BD979D8FBB826A7058215FE1C781E46C2909793AA746FB54844E660FCB056C3A40F9D02D421B7");
+	BIGNUM *msg = BN_new();
+	BN_hex2bn(&msg, MSG);
+	BIGNUM *c = enc_dec(msg, e, n);
+	BIGNUM *dec = enc_dec(c, d, n);
+	mu_assert("RSA Encryption/Decryption not working", strcmp(MSG, BN_bn2hex(dec)) == 0);
+	return 0;
+}
 static char * all_tests() {
 	mu_run_test(test_addition);
 	mu_run_test(test_mult);
@@ -324,6 +340,7 @@ static char * all_tests() {
 	mu_run_test(test_a51);
 	mu_run_test(test_transformations);
 	mu_run_test(test_prime_gen);
+	mu_run_test(test_rsa);
 	return 0;
 }
 
