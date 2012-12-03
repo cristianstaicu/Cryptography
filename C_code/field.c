@@ -85,8 +85,12 @@ polynom shift_right(polynom a, char pos) {
 	/* Dynamic allocation */
 	res.p = (char *)malloc(res.size * sizeof(char));
 	int i;
+
 	for (i = 0; i < a.size; i++) {
 		res.p[i] = a.p[i];
+	}
+	for (i = a.size; i < res.size; i++) {
+		res.p[i] = 0;
 	}
 	return res;
 }

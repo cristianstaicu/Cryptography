@@ -337,13 +337,3 @@ polynom cipher_block_chaining_dec(char *ciphertext, char *iv, char *key) {
 	return res;
 }
 
-char * bin_to_hex(char * in, int size) {
-	char *res = (char *)malloc(size * sizeof(char));
-	return res;
-}
-
-char* cipher_block_chaining_hex(char *message, char *iv, char *key) {
-	polynom res;
-	res = cipher_block_chaining_enc(message, iv, key);
-	bin_to_hex(res.p, res.size);
-}
