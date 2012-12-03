@@ -1,5 +1,4 @@
 #include <openssl/bio.h>
-#include "sponge.h"
 #include "prime_generator.h"
 
 /**
@@ -137,13 +136,12 @@ BIGNUM* generate_random_no(int no_bits) {
 	return res;
 }
 
-BIGNUM* get_long_prime_number(long seed, int no_bits) {
+BIGNUM* get_long_prime_number(int no_bits) {
 	BIGNUM *n;
-	initialize_rand(seed);
 	n = generate_random_no(no_bits);
-//	printf("%s\n", BN_bn2hex(n));
 	while (!BN_is_prime(n, NO_CHECKS_PRIMALITY, NULL, NULL, NULL)) {
 		n = generate_random_no(no_bits);
+		//printf("%s\n", BN_bn2hex(n));
 	}
 	return n;
 }

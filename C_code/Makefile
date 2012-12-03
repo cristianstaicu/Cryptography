@@ -1,6 +1,6 @@
 SERVER_OBJS=Debug/objs/server.o Debug/objs/common.o
 CLIENT_OBJS=Debug/objs/client.o Debug/objs/common.o
-RSA_OBJS= Debug/objs/field.o Debug/objs/lsfr.o Debug/objs/sponge.o Debug/objs/bunny.o Debug/objs/prime_generator.o Debug/objs/rsa_key_generation.o
+RSA_OBJS=Debug/objs/field.o Debug/objs/lsfr.o Debug/objs/bunny.o Debug/objs/all5.o Debug/objs/a51.o  Debug/objs/sponge.o Debug/objs/prime_generator.o  Debug/objs/rsa_key_generation.o
 TESTS_OBJS=Debug/objs/field.o Debug/objs/lsfr.o Debug/objs/bunny.o Debug/objs/all5.o Debug/objs/a51.o  Debug/objs/sponge.o Debug/objs/prime_generator.o Debug/objs/tests.o   
 CC=gcc
 CFLAGS=--std=c99 -g -pedantic -Wall -lm

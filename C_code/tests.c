@@ -2,7 +2,6 @@
 #include "mintest.h"
 #include "all5.h"
 #include "maj5.h"
-#include "sponge.h"
 #include <time.h>
 #include "prime_generator.h"
 #include <openssl/bn.h>
@@ -287,7 +286,8 @@ static char * test_a51() {
 }
 
 static char *test_prime_gen() {
-	BIGNUM *prime_no = get_long_prime_number(38362178, 512);
+	initialize_rand(38362178);
+	BIGNUM *prime_no = get_long_prime_number(512);
 	BIO *out=BIO_new(BIO_s_file());
 	BIO_set_fp(out,stdout,BIO_NOCLOSE);
 	mu_assert("CSPRNG not working", strcmp(BN_bn2dec(prime_no), "2965176724656851839220370116884140168375810923886655990419267657610300066314101848643233278138166935770389908952050642963808793902904855433310166587886791") == 0);
