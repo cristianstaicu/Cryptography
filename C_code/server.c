@@ -1,5 +1,40 @@
 #include "common.h"
 #include "stdio.h"
+#include <openssl/bn.h>
+#include <openssl/bio.h>
+#include "rsa.c"
+
+char * read_word(FILE *f) {
+	char word[10000];
+	int i = 0, j;
+	char c;
+	do {
+		c= fgetc(f);
+	}while (c == ' ' || c == '\n' || c == '\r');
+
+	do {
+		word[i] = c;
+		i++;
+		c = fgetc(f);
+	} while (c != EOF && c != ' ' && c != '\n' && c != '\r');
+	char *res = (char *)malloc((i+1) * sizeof(char));
+	for (j = 0; j < i; j++) {
+		res[j] = word[j];
+	}
+	res[i] = 0;
+	return res;
+}
+
+void get_rsa_serv_private_key(BIGNUM** s_puk, BIGNUM** n){
+	FILE *filepointer;
+	filepointer = fopen("C_code/server_folder/server_rsa_private_key.txt","r");
+
+	char* s_puk_str = read_word(filepointer);
+	char* n_str =  read_word(filepointer);
+	BN_dec2bn(s_puk, s_puk_str);
+	BN_dec2bn(n, n_str);
+}
+
 
 int open_fifo(const char * pathname)
 {
@@ -62,22 +97,31 @@ int main(int argc, char ** argv)
 		write_OK(sc_fifo_fd);
      
 	  	/* Server authentication */
-		read_msg(cs_fifo_fd,&buff);
-		fprintf(stderr,"%c\n",buff[2]);
-
     // GET private rsa key of S, (s_prk,n) from "server_folder/server_rsa_private_key.txt"
 		FILE* file;
-		long long priv_key;
-		long long n;
-		char line[80];
-		file = fopen("server_folder/server_rsa_private_key.txt", "r");
+		BIGNUM* priv_key = BN_new();
+		BIGNUM* n = BN_new();
+		get_rsa_serv_private_key(&n, &priv_key);
 
     // READ c from S
+		int len = read_msg(cs_fifo_fd, &buff);
+		char *buf_str = (char *)malloc((len+1) * sizeof(char));
+		int i;
+		for (i = 0; i < len; i++) {
+			buf_str[i] = (char)buff[i];
+		}
+		print_buff(buff, len);
+		BIGNUM *enc_r = BN_new();
+		BN_dec2bn(&enc_r, buf_str);
+		printf("Received encrypted random number: %s, %d characters\n", BN_bn2dec(enc_r), len);
 
     // DECRYPT c using (s_prk,n) -> r' = c^s_prk mod n
-    /* ... */
+		BIGNUM *r = BN_new();
+		r = enc_dec(enc_r, priv_key, n);
+		char *r_enc_str = BN_bn2dec(r);
+		printf("Decrypted random number, r'=%s\n", r_enc_str);
     // SEND r' to C
-    /* ... */
+		write_msg(cs_fifo_fd, r_enc_str, strlen(r_enc_str) + 1);
 
 	  /* Client authentication */
     // READ client name nm of C

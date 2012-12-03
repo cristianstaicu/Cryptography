@@ -133,4 +133,3 @@ int read_string(int channel_fd, const char * str)
 
 	return (0);
 }
-
