@@ -108,5 +108,10 @@ char * MAJ5(char *key, int n) {
 		if (maj_bit == register5[TAP5 - 1])
 			shift_lsfr(p5.p, p5.size, register5, p5.size - 1);
 	}
+	free(register1);
+	free(register2);
+	free(register3);
+	free(register4);
+	free(register5);
 	return transform_to_str(result, n);;
 }
