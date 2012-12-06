@@ -125,7 +125,14 @@ int main(int argc, char ** argv)
 
 	  /* Client authentication */
     // READ client name nm of C
-    /* ... */
+		u_int8_t * buff;
+		len = read_msg(cs_fifo_fd, &buff);
+		char *buf_username = (char *)malloc((len+1) * sizeof(char));
+		for (i = 0; i < len; i++) {
+			buf_username[i] = (char)buff[i];
+		}
+		printf("Server reads: %s", buf_username);
+		print_buff(buff, len);
     // GET the public rsa keys of the possible clients associated to each name, (names[],c_puk[],n[]) from "client_folder/clients_rsa_public_keys.txt"
     /* ... */
     // EXTRACT from (names[],c_puk[],n[]) the pair (c_puk[i],n[i]) where names[i] = nm

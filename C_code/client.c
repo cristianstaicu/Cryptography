@@ -38,10 +38,20 @@ void get_rsa_serv_pub_key (BIGNUM** s_puk, BIGNUM** n){
 	BN_dec2bn(n, n_str);
 }
 
+void get_rsa_serv_priv_key (BIGNUM** s_prk, BIGNUM** n){
+	FILE *filepointer;
+	filepointer = fopen("C_code/client_folder/client_rsa_private_key.txt", "r");
+	char* s_prk_str = read_word(filepointer);
+	char* n_str = read_word(filepointer);
+	BN_dec2bn(s_prk, s_prk_str);
+	BN_dec2bn(n, n_str);
+}
+
 int main(int argc, char ** argv)
 {
 	int sc_fifo_fd, cs_fifo_fd;
 	BIGNUM* s_puk = BN_new();
+	BIGNUM* s_prk = BN_new();
 	BIGNUM* n = BN_new();
 	/* Mandatory arguments */
 	if( !argv[1] || !argv[2] || !argv[3] || !argv[4] ) {
@@ -107,9 +117,13 @@ int main(int argc, char ** argv)
 
 	/* Client authentication */
   // SEND client_name to S
-  /* ... */
+	char* username = argv[4];
+	printf("client is sending its username: %s\n", username);
+	write_msg(cs_fifo_fd, username, strlen(username) + 1);
+
   // GET private rsa key of C, (s_prk,n) from "client_folder/client_rsa_private_key.txt"
-  /* ... */
+	get_rsa_serv_priv_key(&n, &s_prk);
+	printf("Server public key: (%s %s)\n", BN_bn2dec(s_prk), BN_bn2dec(n));
   // READ c from S
   /* ... */
   // DECRYPT c using (c_prk,n) -> r' = c^c_prk mod n
