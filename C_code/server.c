@@ -56,6 +56,18 @@ void get_client_public_key(char *name_client, BIGNUM** s_puk, BIGNUM** n) {
 	BN_dec2bn(n, n_str);
 }
 
+char * convert_to_chars(char *x) {
+	char *res = (char*) malloc(10000 * sizeof(char));
+	int i,c,power;
+	int j = 0;
+	for (i = 0; x[i] != '\0'; i+=8) {
+		res[j++] = (x[i] - '0') * 128 + (x[i+1] - '0') * 64 + (x[i+2] - '0') * 32 + (x[i+3] - '0') * 16 + (x[i+4] - '0') * 8
+				+ (x[i+5] - '0') * 4 + (x[i+6] - '0') * 2 + (x[i+7] - '0');
+	}
+	res[j] = 0;
+	return res;
+}
+
 int open_fifo(const char * pathname) {
 	/* Recreat xe the FIFO in pathname */
 	unlink(pathname);
@@ -234,12 +246,19 @@ int main(int argc, char ** argv) {
 		/* Encrypt communication */
 		/* Read encrypted message*/
 		len = read_msg(cs_fifo_fd, &buff);
-		printf("Encrypted message received from client: %s\n", buff);
+		printf("Encrypted message + hashed msg received from client: %s\n", buff);
 		char *msg_ciphered = (char *)malloc(10000 * sizeof(char));
-		for (i = 0; i < len; i++) {
+		char *hashed_message = (char *)malloc(10000 * sizeof(char));
+		for (i = 0; i < len - 161; i++) {
 			msg_ciphered[i] = buff[i];
 		}
-		msg_ciphered[len] = 0;
+		msg_ciphered[i] = 0;
+		printf("Encrypted message msg received from client: %s\n", msg_ciphered);
+		for (i = len - 161; i < len; i++) {
+			hashed_message[i - len + 161] = buff[i];
+		}
+		hashed_message[160] = 0;
+		printf("Hashed message from client: %s\n", hashed_message);
 		char decrypted_message[1000];
 //		if (cipher_suite == 'A') {
 //			/* BUNNY */
@@ -284,18 +303,17 @@ int main(int argc, char ** argv) {
 //			}
 //			decrypted_message[strlen(res)] = 0;
 //		}
-		printf("Decrypted message: %s\n", decrypted_message);
-		len = read_msg(cs_fifo_fd, &buff);
-		printf("Hashed message from client: %s\n", buff);
+		printf("Decrypted message: %s\n", convert_to_chars(decrypted_message));
+//		len = read_msg(cs_fifo_fd, &buff);
 		char *computed_hash = SPONGEBUNNY(decrypted_message);
 		printf("Computed Hashed message: %s\n", computed_hash);
-		if (strcmp(buff, computed_hash)) {
+		if (strcmp(hashed_message, computed_hash)) {
 			printf("CORRUPTED MESSAGE RECEIVED\n");
 		} else {
 			FILE *filepointer;
 			filepointer = fopen("C_code/server_folder/received_messages.txt",
 					"a+");
-			fprintf(filepointer, "%s\n", decrypted_message);
+			fprintf(filepointer, "%s\n", convert_to_chars(decrypted_message));
 			fclose(filepointer);
 		}
 		/* Disconnection */
