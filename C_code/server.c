@@ -3,6 +3,7 @@
 #include <openssl/bn.h>
 #include <openssl/bio.h>
 #include "rsa.c"
+#include "prime_generator.h"
 
 char * read_word(FILE *f) {
 	char word[10000];
@@ -35,6 +36,22 @@ void get_rsa_serv_private_key(BIGNUM** s_puk, BIGNUM** n){
 	BN_dec2bn(n, n_str);
 }
 
+void get_client_public_key(char *name_client, BIGNUM** s_puk, BIGNUM** n){
+	FILE *filepointer;
+	filepointer = fopen("C_code/server_folder/clients_rsa_public_keys.txt","r");
+
+	char *name;
+	char *s_puk_str;
+	char* n_str;
+	do {
+		name = read_word(filepointer);
+		s_puk_str = read_word(filepointer);
+		n_str =  read_word(filepointer);
+	} while (strcmp(name, name_client));
+	printf("%s %s\n", s_puk_str, n_str);
+	BN_dec2bn(s_puk, s_puk_str);
+	BN_dec2bn(n, n_str);
+}
 
 int open_fifo(const char * pathname)
 {
@@ -121,7 +138,7 @@ int main(int argc, char ** argv)
 		char *r_enc_str = BN_bn2dec(r);
 		printf("Decrypted random number, r'=%s\n", r_enc_str);
     // SEND r' to C
-		write_msg(cs_fifo_fd, r_enc_str, strlen(r_enc_str) + 1);
+		write_msg(sc_fifo_fd, r_enc_str, strlen(r_enc_str) + 1);
 
 	  /* Client authentication */
     // READ client name nm of C
@@ -131,19 +148,44 @@ int main(int argc, char ** argv)
 		for (i = 0; i < len; i++) {
 			buf_username[i] = (char)buff[i];
 		}
-		printf("Server reads: %s", buf_username);
+		printf("Server reads client username: %s\n", buf_username);
 		print_buff(buff, len);
     // GET the public rsa keys of the possible clients associated to each name, (names[],c_puk[],n[]) from "client_folder/clients_rsa_public_keys.txt"
-    /* ... */
-    // EXTRACT from (names[],c_puk[],n[]) the pair (c_puk[i],n[i]) where names[i] = nm
-    /* ... */
+	// EXTRACT from (names[],c_puk[],n[]) the pair (c_puk[i],n[i]) where names[i] = nm
+		BIGNUM* client_priv_key = BN_new();
+		BIGNUM* client_n = BN_new();
+		get_client_public_key(buf_username, &client_n, &client_priv_key);
+		printf("Client public key for %s is (%s %s)\n", buf_username, BN_bn2dec(client_n), BN_bn2dec(client_priv_key));
     // CREATE a pseudo-random message r
-    /* ... */
+		primitive_p = initialize("1011011");
+		initialize_rand(38362175);
+		BIGNUM *rand;
+		rand = generate_random_no(5);
+		printf("Generated random number: %s\n", BN_bn2dec(rand));
     // ENCRYPT r using s_puk[i] -> c = r^s_puk[i] mod n[i]
-    /* ... */
+		BIGNUM *enc_rs = enc_dec(rand, client_priv_key, client_n);
+		char *rs_enc_str = BN_bn2dec(enc_rs);
+		printf("Encrypted random number: %s\n", rs_enc_str);
     // WRITE c to C
     /* ... */    
-		
+		write_msg(sc_fifo_fd, rs_enc_str, strlen(rs_enc_str) + 1);
+	// READ r' from C
+		len = read_msg(cs_fifo_fd, &buff);
+		buf_str = (char *)malloc((len+1) * sizeof(char));
+		for (i = 0; i < len; i++) {
+			buf_str[i] = (char)buff[i];
+		}
+		print_buff(buff, len);
+		BIGNUM *dec_r = BN_new();
+		BN_dec2bn(&dec_r, buf_str);
+		printf("Received encrypted r' from client: %s, %d characters\n", BN_bn2dec(dec_r), len);
+		if (strcmp(BN_bn2dec(dec_r), BN_bn2dec(rand)) == 0) {
+			printf("CLIENT AUTHENTICATION SUCCESFULL!!\n");
+		} else {
+			printf("Client auth. failed!\n");
+			exit(1);
+		}
+
     /* Negotiation of the cipher suite */
     /* ... */    
 

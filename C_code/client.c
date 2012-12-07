@@ -38,7 +38,7 @@ void get_rsa_serv_pub_key (BIGNUM** s_puk, BIGNUM** n){
 	BN_dec2bn(n, n_str);
 }
 
-void get_rsa_serv_priv_key (BIGNUM** s_prk, BIGNUM** n){
+void get_rsa_client_priv_key (BIGNUM** s_prk, BIGNUM** n){
 	FILE *filepointer;
 	filepointer = fopen("C_code/client_folder/client_rsa_private_key.txt", "r");
 	char* s_prk_str = read_word(filepointer);
@@ -51,7 +51,7 @@ int main(int argc, char ** argv)
 {
 	int sc_fifo_fd, cs_fifo_fd;
 	BIGNUM* s_puk = BN_new();
-	BIGNUM* s_prk = BN_new();
+	BIGNUM* c_prk = BN_new();
 	BIGNUM* n = BN_new();
 	/* Mandatory arguments */
 	if( !argv[1] || !argv[2] || !argv[3] || !argv[4] ) {
@@ -80,8 +80,9 @@ int main(int argc, char ** argv)
   /* ... */
   // CREATE a random number r
 	primitive_p = initialize("1011011");
-	initialize_rand(38362177);
-	BIGNUM *rand = generate_random_no(5);
+	initialize_rand(38362178);
+	BIGNUM *rand;
+	rand = generate_random_no(5);
 //	BIGNUM *rand = BN_new();
 //	BN_add_word(rand, 5);
 	printf("Generated random number: %s\n", BN_bn2dec(rand));
@@ -96,7 +97,7 @@ int main(int argc, char ** argv)
 
   // READ r' from C
 	u_int8_t * buff;
-	int len = read_msg(cs_fifo_fd, &buff);
+	int len = read_msg(sc_fifo_fd, &buff);
 	char *buf_str = (char *)malloc((len+1) * sizeof(char));
 	int i;
 	for (i = 0; i < len; i++) {
@@ -106,14 +107,14 @@ int main(int argc, char ** argv)
 	BIGNUM* dec_r = BN_new();
 	BN_dec2bn(&dec_r, buf_str);
 	printf("Received decrypted random number: %s, %d characters\n", BN_bn2dec(dec_r), len);
+  // CHECK if r = r'
+  /* ... */
 	if (strcmp(BN_bn2dec(dec_r), BN_bn2dec(rand)) == 0) {
 		printf("SERVER AUTHENTICATION SUCCESFULL!!\n");
 	} else {
 		printf("Server auth. failed!\n");
 		exit(1);
 	}
-  // CHECK if r = r'
-  /* ... */
 
 	/* Client authentication */
   // SEND client_name to S
@@ -122,16 +123,26 @@ int main(int argc, char ** argv)
 	write_msg(cs_fifo_fd, username, strlen(username) + 1);
 
   // GET private rsa key of C, (s_prk,n) from "client_folder/client_rsa_private_key.txt"
-	get_rsa_serv_priv_key(&n, &s_prk);
-	printf("Server public key: (%s %s)\n", BN_bn2dec(s_prk), BN_bn2dec(n));
+	get_rsa_client_priv_key(&n, &c_prk);
+	printf("Client private key: (%s %s)\n", BN_bn2dec(c_prk), BN_bn2dec(n));
   // READ c from S
-  /* ... */
+	len = read_msg(sc_fifo_fd, &buff);
+	buf_str = (char *)malloc((len+1) * sizeof(char));
+	for (i = 0; i < len; i++) {
+		buf_str[i] = (char)buff[i];
+	}
+	print_buff(buff, len);
+	enc_r = BN_new();
+	BN_dec2bn(&enc_r, buf_str);
+	printf("Received encrypted random number: %s, %d characters\n", BN_bn2dec(enc_r), len);
+
   // DECRYPT c using (c_prk,n) -> r' = c^c_prk mod n
-  /* ... */
+	BIGNUM *r = BN_new();
+	r = enc_dec(enc_r, c_prk, n);
+	char *r_str = BN_bn2dec(r);
+	printf("Decrypted random number, r'=%s\n", r_str);
   // WRITE r' to S
-  /* ... */
-  // GET private rsa key of C, c_prk from "client_folder/client_rsa_private_key.txt"
-  /* ... */
+	write_msg(cs_fifo_fd, r_str, strlen(r_str) + 1);
   
   /* Negotiation of the cipher suite */
   /* ... */    
