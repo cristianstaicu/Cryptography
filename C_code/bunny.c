@@ -313,6 +313,7 @@ polynom cipher_block_chaining_enc(char *message, char *iv, char *key) {
 		c = BunnyTn(xoredm, k);
 		result[i] = c;
 	}
+	free(key);
 	polynom res = concat(result, pieces);
 	return res;
 }
@@ -334,6 +335,7 @@ polynom cipher_block_chaining_dec(char *ciphertext, char *iv, char *key) {
 		x = split_ciphertext[i];
 	}
 	polynom res = concat(result, pieces);
+	free(key);
 	return res;
 }
 
