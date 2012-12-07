@@ -24,5 +24,6 @@ ssize_t write_msg(int, const u_int8_t *, u_int16_t);
 int read_string(int, const char *);
 int write_OK(int);
 int write_BYE(int);
+char * hex_to_binary(char* hex_array);
 
 #endif

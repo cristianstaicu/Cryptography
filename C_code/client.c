@@ -168,8 +168,40 @@ int main(int argc, char ** argv) {
 	printf("The decrypted key is %s\n", BN_bn2dec(key));
 
 	/* Encrypt communication */
-	/* ... */
-
+	/* Read message */
+	filepointer = fopen("C_code/client_folder/client_message.txt", "r");
+	char message[10000], encrypted_message[10000];
+	fgets(message, 10000, filepointer);
+	printf("Message to be send: %s\n", message);
+	if (cipher == 'A') {
+		/* BUNNY */
+		polynom m = initialize(message);
+		polynom k = initialize(hex_to_binary(BN_bn2hex(key)));
+		polynom c = BunnyTn(m, k);
+		for (i = 0; i < c.size; i++) {
+			encrypted_message[i] = c.p[c.size - i - 1] + '0';
+		}
+		encrypted_message[c.size] = 0;
+	} else if (cipher == 'B') {
+		/* BUNNY CBC */
+		polynom c = cipher_block_chaining_enc(message, hex_to_binary("000000"), hex_to_binary(BN_bn2hex(key)));
+		for (i = 0; i < c.size; i++) {
+			encrypted_message[i] = c.p[c.size - i - 1] + '0';
+		}
+		encrypted_message[c.size] = 0;
+	} else if (cipher == 'C') {
+		/* ALL5 */
+	} else if (cipher == 'D') {
+		/* MAJ5 */
+	} else if (cipher == 'E') {
+		/* A5/1 */
+	}
+	printf("Encrypted message with Bunny is %s\n", encrypted_message);
+	write_msg(cs_fifo_fd, &encrypted_message, strlen(encrypted_message) + 1);
+	/*Compute hash and send it*/
+	char *hashed_msg = SPONGEBUNNY(message);
+	printf("Hashed message: %s\n", hashed_msg);
+	write_msg(cs_fifo_fd, hashed_msg, strlen(hashed_msg) + 1);
 	/* Disconnection */
 	/* ... */
 

@@ -229,8 +229,48 @@ int main(int argc, char ** argv) {
 		write_msg(sc_fifo_fd, rs_enc_str, strlen(rs_enc_str) + 1);
 
 		/* Encrypt communication */
-		/* ... */
+		/* Read encrypted message*/
+		len = read_msg(cs_fifo_fd, &buff);
+		printf("Encrypted message received from client: %s\n", buff);
 
+		char decrypted_message[1000];
+		if (cipher_suite == 'A') {
+			/* BUNNY */
+			polynom c = initialize(buff);
+			polynom k = initialize(hex_to_binary(BN_bn2hex(key)));
+			polynom m = DecBunnyTn(c, k);
+			for (i = 0; i < m.size; i++) {
+				decrypted_message[i] = m.p[m.size - i - 1] + '0';
+			}
+			decrypted_message[m.size] = 0;
+		} if (cipher_suite == 'B') {
+			/* BUNNYCBC */
+			polynom c = cipher_block_chaining_dec(buff, hex_to_binary("000000"), hex_to_binary(BN_bn2hex(key)));
+			for (i = 0; i < c.size - 1; i++) {
+				decrypted_message[i] = c.p[c.size - i - 2] + '0';
+			}
+			decrypted_message[c.size - 1] = 0;
+		} if (cipher_suite == 'C') {
+			/* ALL5 */
+		} if (cipher_suite == 'D') {
+			/* AMJ5 */
+		} if (cipher_suite == 'E') {
+			/* A5/1 */
+		}
+		printf("Decrypted message: %s\n", decrypted_message);
+		len = read_msg(cs_fifo_fd, &buff);
+		printf("Hashed message from client: %s\n", buff);
+		char *computed_hash = SPONGEBUNNY(decrypted_message);
+		printf("Computed Hashed message: %s\n", computed_hash);
+		if (strcmp(buff, computed_hash)) {
+			printf("CORRUPTED MESSAGE RECEIVED\n");
+		} else {
+			FILE *filepointer;
+			filepointer = fopen("C_code/server_folder/received_messages.txt",
+					"a+");
+			fprintf(filepointer, "%s\n", decrypted_message);
+			fclose(filepointer);
+		}
 		/* Disconnection */
 
 next:

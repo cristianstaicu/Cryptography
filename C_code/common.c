@@ -133,3 +133,31 @@ int read_string(int channel_fd, const char * str)
 
 	return (0);
 }
+
+const char* quads[] = { "0000", "0001", "0010", "0011", "0100", "0101", "0110",
+		"0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111" };
+
+const char * hex_to_bin_quad(unsigned char c) {
+	if (c >= '0' && c <= '9')
+		return quads[c - '0'];
+	if (c >= 'A' && c <= 'F')
+		return quads[10 + c - 'A'];
+	if (c >= 'a' && c <= 'f')
+		return quads[10 + c - 'a'];
+	return -1;
+}
+
+char * hex_to_binary(char* hex_array) {
+	int len = strlen(hex_array);
+	char *res = (char*) malloc((len * 4 + 1) * sizeof(char));
+	int i = 0;
+	for (i = 0; i < len; i++) {
+		char *quad = hex_to_bin_quad(hex_array[i]);
+		int j;
+		for (j = 0; j < 4; j++) {
+			res[i * 4 + j] = quad[j];
+		}
+	}
+	res[len * 4 + 1] = 0;
+	return res;
+}
