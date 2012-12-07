@@ -67,6 +67,23 @@ char * convert_to_binary(char *x) {
 		BN_dec2bn(n, n_str);
 	}
 
+	char * binary_to_hex(char * bin_array) {
+		int len = strlen(bin_array);
+		int i, j = 0;
+		char *res = (char*) malloc((len / 4 + 1) * sizeof(char));
+		for (i = 0; i < len; i += 4) {
+			int n = (bin_array[i] - '0') * 8 + (bin_array[i + 1] - '0') * 4
+					+ (bin_array[i + 2] - '0') * 2 + (bin_array[i + 3] - '0');
+			if (n < 10) {
+				res[j++] = '0' + n;
+			} else {
+				res[j++] = 'A' + (n - 10);
+			}
+		}
+		res[len / 4] = 0;
+		return res;
+	}
+
 	int main(int argc, char ** argv) {
 		int sc_fifo_fd, cs_fifo_fd;
 		BIGNUM* s_puk = BN_new();
@@ -96,7 +113,7 @@ char * convert_to_binary(char *x) {
 //	write_msg(cs_fifo_fd,(const u_int8_t *)"A",1);
 // GET public rsa key of S, (s_puk,n), from "client_folder/server_rsa_public_key.txt"
 		get_rsa_serv_pub_key(&n, &s_puk);
-		printf("Server public key: (%s %s)\n", BN_bn2dec(s_puk), BN_bn2dec(n));
+		printf("Server public key: (%s %s)\n", BN_bn2hex(s_puk), BN_bn2hex(n));
 		/* ... */
 		// CREATE a random number r
 		primitive_p = initialize("1011011");
@@ -105,12 +122,12 @@ char * convert_to_binary(char *x) {
 		rand = generate_random_no(5);
 //	BIGNUM *rand = BN_new();
 //	BN_add_word(rand, 5);
-		printf("Generated random number: %s\n", BN_bn2dec(rand));
+		printf("Generated random number: %s\n", BN_bn2hex(rand));
 
 		// ENCRYPT r using (s_puk,n) -> c = r^s_puk mod n
 		BIGNUM *enc_r = enc_dec(rand, s_puk, n);
 		//TODO change here
-		char *r_enc_str = BN_bn2dec(enc_r);
+		char *r_enc_str = BN_bn2hex(enc_r);
 		printf("Encrypted random number: %s\n", r_enc_str);
 		// WRITE c to S
 		write_msg(cs_fifo_fd, r_enc_str, strlen(r_enc_str) + 1);
@@ -125,11 +142,11 @@ char * convert_to_binary(char *x) {
 		}
 		print_buff(buff, len);
 		BIGNUM* dec_r = BN_new();
-		BN_dec2bn(&dec_r, buf_str);
+		BN_hex2bn(&dec_r, buf_str);
 		printf("Received decrypted random number: %s, %d characters\n",
-				BN_bn2dec(dec_r), len);
+				BN_bn2hex(dec_r), len);
 		// CHECK if r = r'
-		if (strcmp(BN_bn2dec(dec_r), BN_bn2dec(rand)) == 0) {
+		if (strcmp(BN_bn2hex(dec_r), BN_bn2hex(rand)) == 0) {
 			printf("SERVER AUTHENTICATION SUCCESFULL!!\n");
 		} else {
 			printf("Server auth. failed!\n");
@@ -144,7 +161,7 @@ char * convert_to_binary(char *x) {
 
 		// GET private rsa key of C, (s_prk,n) from "client_folder/client_rsa_private_key.txt"
 		get_rsa_client_priv_key(&n, &c_prk);
-		printf("Client private key: (%s %s)\n", BN_bn2dec(c_prk), BN_bn2dec(n));
+		printf("Client private key: (%s %s)\n", BN_bn2hex(c_prk), BN_bn2hex(n));
 		// READ c from S
 		len = read_msg(sc_fifo_fd, &buff);
 		buf_str = (char *) malloc((len + 1) * sizeof(char));
@@ -153,14 +170,14 @@ char * convert_to_binary(char *x) {
 		}
 		print_buff(buff, len);
 		enc_r = BN_new();
-		BN_dec2bn(&enc_r, buf_str);
+		BN_hex2bn(&enc_r, buf_str);
 		printf("Received encrypted random number: %s, %d characters\n",
-				BN_bn2dec(enc_r), len);
+				BN_bn2hex(enc_r), len);
 
 		// DECRYPT c using (c_prk,n) -> r' = c^c_prk mod n
 		BIGNUM *r = BN_new();
 		r = enc_dec(enc_r, c_prk, n);
-		char *r_str = BN_bn2dec(r);
+		char *r_str = BN_bn2hex(r);
 		printf("Decrypted random number, r'=%s\n", r_str);
 		// WRITE r' to S
 		write_msg(cs_fifo_fd, r_str, strlen(r_str) + 1);
@@ -182,11 +199,11 @@ char * convert_to_binary(char *x) {
 		}
 		print_buff(buff, len);
 		BIGNUM *enc_key = BN_new();
-		BN_dec2bn(&enc_key, buf_str);
-		printf("The encrypted key is %s\n", BN_bn2dec(enc_key));
+		BN_hex2bn(&enc_key, buf_str);
+		printf("The encrypted key is %s\n", BN_bn2hex(enc_key));
 		BIGNUM *key = BN_new();
 		key = enc_dec(enc_key, c_prk, n);
-		printf("The decrypted key is %s\n", BN_bn2dec(key));
+		printf("The decrypted key is %s\n", BN_bn2hex(key));
 
 		/* Encrypt communication */
 		/* Read message */
@@ -221,7 +238,7 @@ char * convert_to_binary(char *x) {
 			polynom msg_poly = initialize(message);
 			char diff = 24 - (msg_poly.size % 24);
 			if (diff != 24) {
-				msg_poly = shift_left(msg_poly, diff);
+			msg_poly = shift_left(msg_poly, diff);
 			}
 			for (i = 0; i < msg_poly.size; i++) {
 				message[i] = msg_poly.p[msg_poly.size - i - 1] + '0';
@@ -256,6 +273,8 @@ char * convert_to_binary(char *x) {
 		char *hashed_msg = SPONGEBUNNY(message);
 		strcat(encrypted_message, hashed_msg);
 		printf("Hashed message: %s\n", hashed_msg);
+		encrypted_message = binary_to_hex(encrypted_message);
+		printf("Hexed message: %s\n", encrypted_message);
 		write_msg(cs_fifo_fd, encrypted_message, strlen(encrypted_message) + 1);
 		/* Disconnection */
 		/* ... */
