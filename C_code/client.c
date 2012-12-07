@@ -172,8 +172,9 @@ int main(int argc, char ** argv) {
 	/* Encrypt communication */
 	/* Read message */
 	filepointer = fopen("C_code/client_folder/client_message.txt", "r");
-	char message[10000], encrypted_message[10000];
-	fgets(message, 10000, filepointer);
+	char *message = (char *) malloc(10000 * sizeof(char));
+	char *encrypted_message = (char *) malloc(10000 * sizeof(char));;
+	fscanf(filepointer, "%s", message);
 	printf("Message to be send: %s\n", message);
 	if (cipher == 'A') {
 		/* BUNNY */
@@ -199,6 +200,7 @@ int main(int argc, char ** argv) {
 		}
 	} else if (cipher == 'D') {
 		/* MAJ5 */
+		printf("KEY=%s\n", hex_to_binary(BN_bn2hex(key)));
 		char *res = MAJ5ENC(hex_to_binary(BN_bn2hex(key)), message);
 		for (i = 0; i <= strlen(res); i++) {
 			encrypted_message[i] = res[i];
@@ -211,7 +213,7 @@ int main(int argc, char ** argv) {
 		}
 	}
 	printf("Encrypted message is %s\n", encrypted_message);
-	write_msg(cs_fifo_fd, &encrypted_message, strlen(encrypted_message) + 1);
+	write_msg(cs_fifo_fd, encrypted_message, strlen(encrypted_message) + 1);
 	/*Compute hash and send it*/
 	char *hashed_msg = SPONGEBUNNY(message);
 	printf("Hashed message: %s\n", hashed_msg);

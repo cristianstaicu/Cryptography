@@ -34,14 +34,29 @@ char * MAJ5(char *key, int n) {
 	char f[] = {0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 	/* STEP 1 */
+	int i = 0;
 	char *register1 = (char *)malloc((p1.size - 1) * sizeof(char));
+	for (i = 0; i < p1.size-1; i++) {
+		register1[i] = 0;
+	}
 	char *register2 = (char *)malloc((p2.size - 1) * sizeof(char));
+	for (i = 0; i < p2.size-1; i++) {
+		register2[i] = 0;
+	}
 	char *register3 = (char *)malloc((p3.size - 1) * sizeof(char));
+	for (i = 0; i < p3.size-1; i++) {
+		register3[i] = 0;
+	}
 	char *register4 = (char *)malloc((p4.size - 1) * sizeof(char));
+	for (i = 0; i < p4.size-1; i++) {
+		register4[i] = 0;
+	}
 	char *register5 = (char *)malloc((p5.size - 1) * sizeof(char));
+	for (i = 0; i < p5.size-1; i++) {
+		register5[i] = 0;
+	}
 
 	/* STEP 2 */
-	int i = 0;
 	for (i = 0; i < strlen(key); i++) {
 		char key_byte = key[i] - '0';
 		shift_lsfr(p1.p, p1.size, register1, p1.size - 1);
@@ -129,10 +144,13 @@ char * xor_str(char *a, char *b) {
 
 char * MAJ5ENC(char *key, char* message) {
 	char *keystream = MAJ5(key, strlen(message));
+	printf("KS=%s-\n", keystream);
 	return xor_str(keystream, message);
 }
 
 char * MAJ5DEC(char *key, char* ciphertext) {
 	char *keystream = MAJ5(key, strlen(ciphertext));
+	printf("KS=%s-\n", keystream);
+	printf("MSG=%s-\n", ciphertext);
 	return xor_str(keystream, ciphertext);
 }
