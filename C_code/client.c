@@ -176,42 +176,53 @@ int main(int argc, char ** argv) {
 	char *encrypted_message = (char *) malloc(10000 * sizeof(char));;
 	fscanf(filepointer, "%s", message);
 	printf("Message to be send: %s\n", message);
-	if (cipher == 'A') {
-		/* BUNNY */
-		polynom m = initialize(message);
-		polynom k = initialize(hex_to_binary(BN_bn2hex(key)));
-		polynom c = BunnyTn(m, k);
-		for (i = 0; i < c.size; i++) {
-			encrypted_message[i] = c.p[c.size - i - 1] + '0';
-		}
-		encrypted_message[c.size] = 0;
-	} else if (cipher == 'B') {
+//	if (cipher == 'A') {
+//		/* BUNNY */
+//		polynom m = initialize(message);
+//		polynom k = initialize(hex_to_binary(BN_bn2hex(key)));
+//		polynom c = BunnyTn(m, k);
+//		for (i = 0; i < c.size; i++) {
+//			encrypted_message[i] = c.p[c.size - i - 1] + '0';
+//		}
+//		encrypted_message[c.size] = 0;
+	if (cipher == 'A' || cipher == 'B') {
 		/* BUNNY CBC */
 		polynom c = cipher_block_chaining_enc(message, hex_to_binary("000000"), hex_to_binary(BN_bn2hex(key)));
 		for (i = 0; i < c.size; i++) {
 			encrypted_message[i] = c.p[c.size - i - 1] + '0';
 		}
 		encrypted_message[c.size] = 0;
-	} else if (cipher == 'C') {
+		polynom msg_poly = initialize(message);
+		char diff = 24 - (msg_poly.size % 24);
+		if (diff != 24) {
+			msg_poly = shift_left(msg_poly, diff);
+		}
+		for (i = 0; i < msg_poly.size; i++) {
+			message[i] = msg_poly.p[msg_poly.size - i - 1] + '0';
+		}
+		message[msg_poly.size] = 0;
+		printf("The padded message: %s\n", message);
+	} else if (cipher == 'C' || cipher == 'D') {
 		/* ALL5 */
 		char *res = ALL5ENC(hex_to_binary(BN_bn2hex(key)), message);
 		for (i = 0; i <= strlen(res); i++) {
 			encrypted_message[i] = res[i];
 		}
-	} else if (cipher == 'D') {
+	} else if (cipher == 'E' || cipher == 'F') {
 		/* MAJ5 */
 		printf("KEY=%s\n", hex_to_binary(BN_bn2hex(key)));
 		char *res = MAJ5ENC(hex_to_binary(BN_bn2hex(key)), message);
 		for (i = 0; i <= strlen(res); i++) {
 			encrypted_message[i] = res[i];
 		}
-	} else if (cipher == 'E') {
-		/* A5/1 */
-		char *res = A51ENC(hex_to_binary(BN_bn2hex(key)), message);
-		for (i = 0; i <= strlen(res); i++) {
-			encrypted_message[i] = res[i];
-		}
 	}
+//	} else if (cipher == 'E') {
+//		/* A5/1 */
+//		char *res = A51ENC(hex_to_binary(BN_bn2hex(key)), message);
+//		for (i = 0; i <= strlen(res); i++) {
+//			encrypted_message[i] = res[i];
+//		}
+//	}
 	printf("Encrypted message is %s\n", encrypted_message);
 	write_msg(cs_fifo_fd, encrypted_message, strlen(encrypted_message) + 1);
 	/*Compute hash and send it*/

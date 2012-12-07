@@ -32,7 +32,7 @@ int main(int argc, char ** argv) {
 	BN_sub_word(p, 1);
 	printf("p-1=%s\n", BN_bn2dec(p));
 	BN_sub_word(q, 1);
-	printf("p-1=%s\n", BN_bn2dec(q));
+	printf("q-1=%s\n", BN_bn2dec(q));
 	phi = BN_new();
 	BN_init(tmp);
 	BN_mul(phi, p, q, tmp);
@@ -41,7 +41,7 @@ int main(int argc, char ** argv) {
 	BIGNUM * e = BN_new();
 	BIGNUM *gcd = BN_new();
 	BN_add_word(e, 3);
-	for ( ; ; BN_add_word(e, 1)) {
+	for ( ; ; BN_add_word(e, 2)) {
 		tmp = BN_CTX_new();
 		BN_gcd(gcd, e, phi, tmp);
 		if (BN_is_one(gcd))

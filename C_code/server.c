@@ -241,30 +241,30 @@ int main(int argc, char ** argv) {
 		}
 		msg_ciphered[len] = 0;
 		char decrypted_message[1000];
-		if (cipher_suite == 'A') {
-			/* BUNNY */
-			polynom c = initialize(msg_ciphered);
-			polynom k = initialize(hex_to_binary(key_string));
-			polynom m = DecBunnyTn(c, k);
-			for (i = 0; i < m.size; i++) {
-				decrypted_message[i] = m.p[m.size - i - 1] + '0';
-			}
-			decrypted_message[m.size] = 0;
-		} if (cipher_suite == 'B') {
+//		if (cipher_suite == 'A') {
+//			/* BUNNY */
+//			polynom c = initialize(msg_ciphered);
+//			polynom k = initialize(hex_to_binary(key_string));
+//			polynom m = DecBunnyTn(c, k);
+//			for (i = 0; i < m.size; i++) {
+//				decrypted_message[i] = m.p[m.size - i - 1] + '0';
+//			}
+//			decrypted_message[m.size] = 0;
+		if (cipher_suite == 'A' || cipher_suite == 'B') {
 			/* BUNNYCBC */
 			polynom c = cipher_block_chaining_dec(msg_ciphered, hex_to_binary("000000"), hex_to_binary(key_string));
 			for (i = 0; i < c.size; i++) {
 				decrypted_message[i] = c.p[c.size - i - 1] + '0';
 			}
-			decrypted_message[c.size - 1] = 0;
-		} if (cipher_suite == 'C') {
+			decrypted_message[c.size] = 0;
+		} if (cipher_suite == 'C' || cipher_suite =='D') {
 			/* ALL5 */
 			char *res = ALL5DEC(hex_to_binary(key_string), msg_ciphered);
 			for (i = 0; i <= strlen(res); i++) {
 				decrypted_message[i] = res[i];
 			}
-			decrypted_message[strlen(res)] = 0;
-		} if (cipher_suite == 'D') {
+			decrypted_message[strlen(res) + 1] = 0;
+		} if (cipher_suite == 'E'  || cipher_suite =='F') {
 			/* MAJ5 */
 			printf("KEY=%s\n",hex_to_binary(key_string));
 			printf("MSG=%s\n",msg_ciphered);
@@ -273,16 +273,17 @@ int main(int argc, char ** argv) {
 				decrypted_message[i] = res[i];
 			}
 			decrypted_message[strlen(res)] = 0;
-		} else if (cipher_suite == 'E') {
-			/* A51 */
-			printf("KEY=%s\n",hex_to_binary(key_string));
-			printf("MSG=%s\n",msg_ciphered);
-			char *res = A51DEC(hex_to_binary(key_string), msg_ciphered);
-			for (i = 0; i <= strlen(res); i++) {
-				decrypted_message[i] = res[i];
-			}
-			decrypted_message[strlen(res)] = 0;
 		}
+//		} else if (cipher_suite == 'E') {
+//			/* A51 */
+//			printf("KEY=%s\n",hex_to_binary(key_string));
+//			printf("MSG=%s\n",msg_ciphered);
+//			char *res = A51DEC(hex_to_binary(key_string), msg_ciphered);
+//			for (i = 0; i <= strlen(res); i++) {
+//				decrypted_message[i] = res[i];
+//			}
+//			decrypted_message[strlen(res)] = 0;
+//		}
 		printf("Decrypted message: %s\n", decrypted_message);
 		len = read_msg(cs_fifo_fd, &buff);
 		printf("Hashed message from client: %s\n", buff);
