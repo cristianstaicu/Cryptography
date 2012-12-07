@@ -105,5 +105,10 @@ char * ALL5(char *key, int n) {
 //		print_register(register3, p3.size - 1);
 //		print_register(register4, p4.size - 1);
 //		print_register(register5, p5.size - 1);
+	free(register1);
+	free(register2);
+	free(register3);
+	free(register4);
+	free(register5);
 	return transform_to_str(result, n);;
 }
