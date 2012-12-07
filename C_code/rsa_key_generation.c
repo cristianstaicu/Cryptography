@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 const int RSA_KEY_LENGTH = 512;
-const long SEED = 38362178;
+const long SEED = 38362179;
 
 
 int main(int argc, char ** argv) {
@@ -28,15 +28,15 @@ int main(int argc, char ** argv) {
 	phi = BN_new();
 	BN_copy(n, p);
 	BN_mul(n, n, q, tmp);
-	printf("n=%s\n", BN_bn2hex(n));
+	printf("n=%s\n", BN_bn2dec(n));
 	BN_sub_word(p, 1);
-	printf("p-1=%s\n", BN_bn2hex(p));
+	printf("p-1=%s\n", BN_bn2dec(p));
 	BN_sub_word(q, 1);
-	printf("p-1=%s\n", BN_bn2hex(q));
+	printf("p-1=%s\n", BN_bn2dec(q));
 	phi = BN_new();
 	BN_init(tmp);
 	BN_mul(phi, p, q, tmp);
-	printf("(p-1)(q-1)=%s\n", BN_bn2hex(phi));
+	printf("(p-1)(q-1)=%s\n", BN_bn2dec(phi));
 	/* Find the smallest integer coprime with phi */
 	BIGNUM * e = BN_new();
 	BIGNUM *gcd = BN_new();
@@ -47,7 +47,7 @@ int main(int argc, char ** argv) {
 		if (BN_is_one(gcd))
 			break;
 	}
-	printf("e=%s\n", BN_bn2hex(e));
+	printf("e=%s\n", BN_bn2dec(e));
 	/* Find d, the inverse of e in Z_phi */
 	BIGNUM * d = BN_new();
 	BIGNUM * i = BN_new();
@@ -64,6 +64,6 @@ int main(int argc, char ** argv) {
 			break;
 		}
 	}
-	printf("d=%s\n", BN_bn2hex(d));
+	printf("d=%s\n", BN_bn2dec(d));
 	return 0;
 }
