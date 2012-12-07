@@ -38,10 +38,12 @@ unsigned char* compress(char x[], int len) {
 BIGNUM *transform_to_bignum(polynom p) {
 	BIGNUM *n = BN_new();
 	int len = p.size / 8;
+	unsigned char* x = compress(p.p, p.size);
 	if (p.size % 8 != 0) {
 		len++;
 	}
-	BN_bin2bn(compress(p.p, p.size), len, n);
+	BN_bin2bn(x, len, n);
+	free(x);
 	return n;
 }
 
@@ -74,6 +76,7 @@ polynom transform_to_poly(BIGNUM *n) {
 		if ((bn_bytes[i] >> 7) > 0)
 			p.p[i * 8 + 7] = (bn_bytes[i] >> 7) % 2;
 	}
+	free(bn_bytes);
 	return p;
 }
 

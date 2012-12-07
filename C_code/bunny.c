@@ -78,7 +78,7 @@ polynom* apply_matrix(polynom *x, polynom ** ml) {
  			}
 		}
 	}
-
+	//teorically here we could delete the allocation of the matrix, but we cannot cause 1 test fails - cipher_blocks ...
 	return r;
 }
 
@@ -291,6 +291,7 @@ polynom BunnyTn(polynom m, polynom k) {
 		polynom * msg_mixed = MixingLayer(msg_split);
 		polynom concated = concat(msg_mixed, 4);
 		partial_result = add(concated, keys[round]);
+		free(msg_mixed);
 	} while (round < NO_ROUNDS);
 	return partial_result;
 }
