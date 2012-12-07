@@ -334,9 +334,8 @@ polynom cipher_block_chaining_dec(char *ciphertext, char *iv, char *key) {
 		result[i] = p;
 		x = split_ciphertext[i];
 	}
-	polynom res = concat(result, pieces);
 	free(key);
-
+	polynom res = concat(result, pieces);
 	return res;
 }
 
