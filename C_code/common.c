@@ -158,6 +158,6 @@ char * hex_to_binary(char* hex_array) {
 			res[i * 4 + j] = quad[j];
 		}
 	}
-	res[len * 4 + 1] = 0;
+	res[len * 4] = 0;
 	return res;
 }

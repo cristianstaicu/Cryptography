@@ -105,7 +105,6 @@ BIGNUM* generate_random_no(int no_bits) {
 	polynom res_p;
 //	print_binary("v",v);
 	res_p = sponge_poly(v, no_bits);
-//	print_binary("res",res_p);
 	res = transform_to_bignum(res_p);
 //	printf("%s\n", BN_bn2hex(res));
 	/* Modify state*/

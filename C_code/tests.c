@@ -164,7 +164,7 @@ char * hex_to_binary(char* hex_array) {
 			res[i * 4 + j] = quad[j];
 		}
 	}
-	res[len * 4 + 1] = 0;
+	res[len * 4] = 0;
 	return res;
 }
 
@@ -253,6 +253,10 @@ static char * test_maj5() {
 	char * res = MAJ5(hex_to_binary("48C4A2E691D5B3F7"), 228);
 	mu_assert("MAJ5 is not working!",
 			strcmp(binary_to_hex(res), "2E4ED25CBB2DDF55B8277286A7D07EB160C252B6B936DEAEC95C3C2CC") == 0);
+	char *r = MAJ5ENC(hex_to_binary("48C4A2E691D5B3F7"), "11110000");
+	mu_assert("MAJ5ENC is not working!", strcmp(r, "11011110") == 0);
+	r = MAJ5DEC(hex_to_binary("48C4A2E691D5B3F7"), r);
+	mu_assert("MAJ5DEC is not working!", strcmp(r, "11110000") == 0);
 	return 0;
 }
 
@@ -260,6 +264,10 @@ static char * test_all5() {
 	char * res = ALL5(hex_to_binary("48C4A2E691D5B3F7"), 228);
 	mu_assert("ALL5 is not working!",
 			strcmp(binary_to_hex(res), "291203071AA0318E45A288A297684B2008A1421A3A1D1811029E20972") == 0);
+	char *r = ALL5ENC(hex_to_binary("48C4A2E691D5B3F7"), "11110000");
+	mu_assert("ALL5ENC is not working!", strcmp(r, "11011001") == 0);
+	r = ALL5DEC(hex_to_binary("48C4A2E691D5B3F7"), r);
+	mu_assert("ALL5DEC is not working!", strcmp(r, "11110000") == 0);
 	return 0;
 }
 
@@ -283,6 +291,10 @@ static char * test_a51() {
 	char * res = a51(hex_to_binary("48C4A2E691D5B3F7"), 228);
 	mu_assert("A51 is not working!",
 			strcmp(binary_to_hex(res), "A9A7552C17F40A8D5B70C2AD3946049FA6B46BABF6CA4DA65F20DBE35") == 0);
+//	char *r = A51ENC(hex_to_binary("48C4A2E691D5B3F7"), "11110000");
+//	mu_assert("A51ENC is not working!", strcmp(r, "01011001") == 0);
+//	r = A51DEC(hex_to_binary("48C4A2E691D5B3F7"), r);
+//	mu_assert("A51DEC is not working!", strcmp(r, "11110000") == 0);
 	return 0;
 }
 

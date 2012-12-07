@@ -112,3 +112,13 @@ char * ALL5(char *key, int n) {
 	free(register5);
 	return transform_to_str(result, n);;
 }
+
+char * ALL5ENC(char *key, char* message) {
+	char *keystream = ALL5(key, strlen(message));
+	return xor_str(keystream, message);
+}
+
+char * ALL5DEC(char *key, char* ciphertext) {
+	char *keystream = ALL5(key, strlen(ciphertext));
+	return xor_str(keystream, ciphertext);
+}

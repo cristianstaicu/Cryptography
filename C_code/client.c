@@ -6,6 +6,8 @@
 #include <openssl/bio.h>
 #include "prime_generator.h"
 #include "rsa.c"
+#include "all5.h"
+#include "maj5.h"
 
 char * read_word(FILE *f) {
 	char word[10000];
@@ -191,12 +193,24 @@ int main(int argc, char ** argv) {
 		encrypted_message[c.size] = 0;
 	} else if (cipher == 'C') {
 		/* ALL5 */
+		char *res = ALL5ENC(hex_to_binary(BN_bn2hex(key)), message);
+		for (i = 0; i <= strlen(res); i++) {
+			encrypted_message[i] = res[i];
+		}
 	} else if (cipher == 'D') {
 		/* MAJ5 */
+		char *res = MAJ5ENC(hex_to_binary(BN_bn2hex(key)), message);
+		for (i = 0; i <= strlen(res); i++) {
+			encrypted_message[i] = res[i];
+		}
 	} else if (cipher == 'E') {
 		/* A5/1 */
+		char *res = A51ENC(hex_to_binary(BN_bn2hex(key)), message);
+		for (i = 0; i <= strlen(res); i++) {
+			encrypted_message[i] = res[i];
+		}
 	}
-	printf("Encrypted message with Bunny is %s\n", encrypted_message);
+	printf("Encrypted message is %s\n", encrypted_message);
 	write_msg(cs_fifo_fd, &encrypted_message, strlen(encrypted_message) + 1);
 	/*Compute hash and send it*/
 	char *hashed_msg = SPONGEBUNNY(message);

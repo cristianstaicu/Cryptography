@@ -115,3 +115,24 @@ char * MAJ5(char *key, int n) {
 	free(register5);
 	return transform_to_str(result, n);;
 }
+
+/* Assumes strlen a == strlen b*/
+char * xor_str(char *a, char *b) {
+	char *res = malloc((strlen(a) + 1) * sizeof(char));
+	int i;
+	for (i = 0; i < strlen(a); i++) {
+		res[i] = ((a[i]-'0') ^ (b[i] - '0')) + '0';
+	}
+	res[strlen(a)] = 0;
+	return res;
+}
+
+char * MAJ5ENC(char *key, char* message) {
+	char *keystream = MAJ5(key, strlen(message));
+	return xor_str(keystream, message);
+}
+
+char * MAJ5DEC(char *key, char* ciphertext) {
+	char *keystream = MAJ5(key, strlen(ciphertext));
+	return xor_str(keystream, ciphertext);
+}

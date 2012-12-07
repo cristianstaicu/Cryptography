@@ -208,3 +208,13 @@ char* a51 (char* key, int n){
 	output[n] = 0;
 	return output;
 }
+
+char * A51ENC(char *key, char* message) {
+	char *keystream = ALL5(key, strlen(message));
+	return xor_str(keystream, message);
+}
+
+char * A51DEC(char *key, char* ciphertext) {
+	char *keystream = a51(key, strlen(ciphertext));
+	return xor_str(keystream, ciphertext);
+}
