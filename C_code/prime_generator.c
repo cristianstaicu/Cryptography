@@ -28,13 +28,17 @@ unsigned char* compress(char x[], int len) {
 	unsigned char *res = (unsigned char *) malloc(l * sizeof(char));
 	int i = 0;
 	for (i = 0; i < l; i++) {
-		res[i] = x[8 * i] + 2 * x[8 * i + 1] + 4 * x[8 * i + 2]
-				+ 8 * x[8 * i + 3] + 16 * x[8 * i + 4] + 32 * x[8 * i + 5]
-				+ 64 * x[8 * i + 6] + 128 * x[8 * i + 7];
+		res[i] = x[8 * i] + 2 * x[8 * i + 1] + 4 * x[8 * i + 2] + 8 * x[8 * i
+				+ 3] + 16 * x[8 * i + 4] + 32 * x[8 * i + 5] + 64
+				* x[8 * i + 6] + 128 * x[8 * i + 7];
 	}
 	return res;
 }
 
+/**
+ * Transform from polyom to BIGNUM (8 bytes of polynom representation are
+ * converted in a single byte in BIGNUM using the compress function)
+ */
 BIGNUM *transform_to_bignum(polynom p) {
 	BIGNUM *n = BN_new();
 	int len = p.size / 8;
@@ -97,16 +101,16 @@ void initialize_rand(long seed_material) {
 	c_bn = transform_to_bignum(c);
 	counter = BN_new();
 	BN_add_word(counter, 1);
-//	printf("---->%s\n", BN_bn2hex(counter));
+	//	printf("---->%s\n", BN_bn2hex(counter));
 }
 
 BIGNUM* generate_random_no(int no_bits) {
 	BIGNUM *res;
 	polynom res_p;
-//	print_binary("v",v);
+	//	print_binary("v",v);
 	res_p = sponge_poly(v, no_bits);
 	res = transform_to_bignum(res_p);
-//	printf("%s\n", BN_bn2hex(res));
+	//	printf("%s\n", BN_bn2hex(res));
 	/* Modify state*/
 	/* Extend V with 0x03*/
 	v_padded.size = v.size + 8;
@@ -122,19 +126,19 @@ BIGNUM* generate_random_no(int no_bits) {
 	v_padded = sponge_poly(v_padded, STATE_SIZE);
 
 	BIGNUM *v_bn = transform_to_bignum(v);
-//	printf("%s\n", BN_bn2hex(v_bn));
+	//	printf("%s\n", BN_bn2hex(v_bn));
 	BIGNUM *h_bn = transform_to_bignum(v_padded);
 	BN_add(v_bn, v_bn, h_bn);
 	BN_add(v_bn, v_bn, c_bn);
 	BN_add(v_bn, v_bn, counter);
-//	printf("%s\n\n", BN_bn2hex(v_bn));
+	//	printf("%s\n\n", BN_bn2hex(v_bn));
 	v = transform_to_poly(v_bn);
 
 	/* Truncate to STATE_SIZE bits */
 	v = truncate_poly(v, STATE_SIZE);
-//	print_binary("v_end",v);
+	//	print_binary("v_end",v);
 	BN_add_word(counter, 1);
-//	printf("---->%s\n", BN_bn2hex(counter));
+	//	printf("---->%s\n", BN_bn2hex(counter));
 	return res;
 }
 
